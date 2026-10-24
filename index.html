@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mi Autenticador Web</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/otpauth/9.2.2/otpauth.umd.min.js"></script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .tarjeta {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+    h2 {
+      margin-top: 0;
+      color: #333;
+    }
+    .codigo {
+      font-family: monospace;
+      font-size: 2.6rem;
+      font-weight: bold;
+      color: #1a73e8;
+      letter-spacing: 5px;
+      background: #e8f0fe;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0 10px 0;
+    }
+    .tiempo {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background: #1557b0;
+    }
+    .estado {
+      margin-top: 15px;
+      font-size: 0.85rem;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="tarjeta">
+    <h2>Código de Acceso</h2>
+    <div id="codigo" class="codigo">------</div>
+    <div id="tiempo" class="tiempo">Presiona para ver el código</div>
+    <button onclick="leerCodigo()">Lectura de código</button>
+    <div id="estado" class="estado">Listo para consultar</div>
+  </div>
+
+  <script>
+    // Tu clave de vinculación incorporada directamente
+    const CLAVE_SECRETA = "QO6YTQ7KZU72VX7N";
+
+    const totp = new OTPAuth.TOTP({
+      issuer: "Google",
+      label: "Acceso",
+      algorithm: "SHA1",
+      digits: 6,
+      period: 30,
+      secret: OTPAuth.Secret.fromBase32(CLAVE_SECRETA)
+    });
+
+    let temporizador = null;
+
+    function leerCodigo() {
+      // 1. Genera el código actual idéntico a la app móvil
+      const token = totp.generate();
+      document.getElementById("codigo").innerText = token.slice(0, 3) + " " + token.slice(3);
+      document.getElementById("estado").innerText = "Código leído correctamente";
+
+      // 2. Calcula los segundos restantes del ciclo de 30 segundos
+      const tiempoActual = Math.floor(Date.now() / 1000);
+      let segundosRestantes = 30 - (tiempoActual % 30);
+
+      // 3. Inicia la cuenta regresiva en pantalla
+      clearInterval(temporizador);
+      document.getElementById("tiempo").innerText = "Expira en: " + segundosRestantes + "s";
+
+      temporizador = setInterval(() => {
+        segundosRestantes--;
+        if (segundosRestantes <= 0) {
+          clearInterval(temporizador);
+          document.getElementById("tiempo").innerText = "Código expirado. Vuelve a presionar.";
+        } else {
+          document.getElementById("tiempo").innerText = "Expira en: " + segundosRestantes + "s";
+        }
+      }, 1000);
+    }
+  </script>
+
+</body>
+</html>
