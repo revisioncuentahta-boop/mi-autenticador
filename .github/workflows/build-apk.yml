@@ -10,32 +10,34 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v4
 
-      - name: Instalar Node.js
+      - name: Preparar entorno Node.js
         uses: setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
-      - name: Instalar Java
+      - name: Configurar Java
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: 17
 
-      - name: Instalar Capacitor
+      - name: Instalar y preparar Capacitor
         run: |
+          mkdir -p www
+          cp index.html www/
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "Portal Hyundai" "com.automotor.portalhyundai" --web-dir .
+          npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
+          npx cap init "Portal Hyundai" "com.automotor.portalhyundai" --web-dir www
           npx cap add android
 
-      - name: Compilar APK en modo Debug
+      - name: Compilar APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: Subir APK descargable
+      - name: Subir instalador APK
         uses: actions/upload-artifact@v4
         with:
-          name: Portal-Hyundai-APK
+          name: Portal-Hyundai-Instalador
           path: android/app/build/outputs/apk/debug/app-debug.apk
