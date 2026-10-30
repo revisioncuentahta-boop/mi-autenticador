@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Descargar codigo
+      - name: Descargar repositorio
         uses: actions/checkout@v4
 
       - name: Configurar Java 17
@@ -18,12 +18,15 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Instalar Node.js
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Generar proyecto Android nativo
+      - name: Crear proyecto Android con Capacitor
         run: |
           mkdir -p www
           cp index.html www/
@@ -31,13 +34,13 @@ jobs:
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap init "Portal Hyundai" "com.automotor.portalhyundai" --web-dir www
           npx cap add android
-          npx cap copy android
 
-      - name: Compilar APK con Gradle
+      - name: Aceptar licencias y compilar APK
         run: |
+          yes | sdkmanager --licenses || true
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --no-daemon
 
       - name: Guardar instalador APK
         uses: actions/upload-artifact@v4
