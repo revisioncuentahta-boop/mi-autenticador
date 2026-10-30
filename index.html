@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mi Autenticador Web</title>
+  <title>Portal de Acceso - Taller Hyundai</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/otpauth/9.2.2/otpauth.umd.min.js"></script>
   <style>
     body {
@@ -14,106 +14,487 @@
       align-items: center;
       min-height: 100vh;
       margin: 0;
+      padding: 15px;
+      box-sizing: border-box;
     }
     .tarjeta {
       background: #ffffff;
-      padding: 30px;
+      padding: 28px;
       border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-      width: 320px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 440px;
       text-align: center;
+      box-sizing: border-box;
     }
-    h2 {
-      margin-top: 0;
-      color: #333;
+    h2, h3 { margin-top: 0; color: #002c5f; }
+    input {
+      width: 100%;
+      padding: 11px;
+      margin: 6px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 0.95rem;
     }
-    .codigo {
-      font-family: monospace;
-      font-size: 2.6rem;
-      font-weight: bold;
-      color: #1a73e8;
-      letter-spacing: 5px;
-      background: #e8f0fe;
-      padding: 15px;
-      border-radius: 8px;
-      margin: 20px 0 10px 0;
-    }
-    .tiempo {
-      font-size: 0.85rem;
-      color: #666;
-      margin-bottom: 20px;
-    }
-    button {
-      background: #1a73e8;
+    .btn {
+      background: #002c5f;
       color: white;
       border: none;
-      padding: 14px;
-      font-size: 1rem;
+      padding: 12px;
+      font-size: 0.95rem;
       font-weight: bold;
       border-radius: 6px;
       cursor: pointer;
       width: 100%;
+      margin-top: 8px;
+      transition: background 0.2s;
     }
-    button:hover {
-      background: #1557b0;
+    .btn:hover { background: #001e40; }
+    .btn-secundario {
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #cbd5e1;
+      margin-top: 8px;
     }
-    .estado {
+    .btn-secundario:hover { background: #e2e8f0; }
+    .btn-peligro { background: #dc2626; color: white; padding: 6px 10px; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-exito { background: #16a34a; color: white; padding: 6px 10px; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; }
+    .btn-copiar {
+      background: #eef2f6;
+      border: 1px solid #cbd5e1;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .btn-copiar:hover { background: #dbe4ee; }
+    .enlaces-pie {
+      display: flex;
+      justify-content: space-between;
       margin-top: 15px;
       font-size: 0.85rem;
-      color: #888;
     }
+    .enlaces-pie a { color: #0284c7; text-decoration: none; cursor: pointer; font-weight: 500; }
+    .enlaces-pie a:hover { text-decoration: underline; }
+    .caja-credenciales {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px;
+      text-align: left;
+      margin: 15px 0;
+      font-size: 0.9rem;
+    }
+    .fila-dato {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 6px 0;
+    }
+    .codigo-otp {
+      font-family: monospace;
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #002c5f;
+      letter-spacing: 5px;
+      background: #e8f0fe;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 12px 0 5px 0;
+    }
+    .tabla-admin {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 0.8rem;
+      text-align: left;
+    }
+    .tabla-admin th, .tabla-admin td {
+      border: 1px solid #e2e8f0;
+      padding: 8px;
+      vertical-align: middle;
+    }
+    .tabla-admin th { background: #f1f5f9; }
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: bold;
+    }
+    .badge-pendiente { background: #fef3c7; color: #92400e; }
+    .badge-aprobado { background: #dcfce7; color: #166534; }
+    .badge-reseteo { background: #fee2e2; color: #991b1b; }
+    .oculto { display: none; }
+    .mensaje { font-size: 0.85rem; margin-top: 8px; }
   </style>
 </head>
 <body>
 
   <div class="tarjeta">
-    <h2>Código de Acceso</h2>
-    <div id="codigo" class="codigo">------</div>
-    <div id="tiempo" class="tiempo">Presiona para ver el código</div>
-    <button onclick="leerCodigo()">Lectura de código</button>
-    <div id="estado" class="estado">Listo para consultar</div>
+    <!-- 1. LOGIN DE USUARIOS (TALLERES) -->
+    <div id="vistaLogin">
+      <h2>Acceso Taller</h2>
+      <input type="text" id="loginId" placeholder="ID de Usuario">
+      <input type="password" id="loginPass" placeholder="Contraseña">
+      <button class="btn" onclick="iniciarSesion()">Ingresar</button>
+      <div id="msgLogin" class="mensaje"></div>
+
+      <div class="enlaces-pie">
+        <a onclick="cambiarVista('vistaRegistro')">Registrar Taller</a>
+        <a onclick="cambiarVista('vistaReset')">¿Olvidó contraseña?</a>
+        <a onclick="cambiarVista('vistaAdminLogin')">Admin</a>
+      </div>
+    </div>
+
+    <!-- 2. REGISTRO DE TALLER -->
+    <div id="vistaRegistro" class="oculto">
+      <h2>Registro de Taller</h2>
+      <input type="text" id="regId" placeholder="ID deseado (sin espacios)">
+      <input type="text" id="regTaller" placeholder="Nombre del Taller Autorizado">
+      <input type="password" id="regPass" placeholder="Contraseña">
+      <button class="btn" onclick="registrarUsuario()">Solicitar Registro</button>
+      <button class="btn btn-secundario" onclick="cambiarVista('vistaLogin')">Volver</button>
+      <div id="msgReg" class="mensaje"></div>
+    </div>
+
+    <!-- 3. SOLICITUD DE RESETEO -->
+    <div id="vistaReset" class="oculto">
+      <h2>Recuperar Contraseña</h2>
+      <p style="font-size: 0.85rem; color: #64748b;">Ingresa tu ID y la nueva contraseña que deseas usar para que el administrador la autorice.</p>
+      <input type="text" id="resetId" placeholder="Tu ID de Usuario">
+      <input type="password" id="resetNuevoPass" placeholder="Nueva Contraseña deseada">
+      <button class="btn" onclick="solicitarReset()">Enviar Solicitud</button>
+      <button class="btn btn-secundario" onclick="cambiarVista('vistaLogin')">Volver</button>
+      <div id="msgReset" class="mensaje"></div>
+    </div>
+
+    <!-- 4. LOGIN ADMINISTRADOR -->
+    <div id="vistaAdminLogin" class="oculto">
+      <h2>Acceso Administrador</h2>
+      <input type="text" id="adminUser" placeholder="Usuario Admin">
+      <input type="password" id="adminPass" placeholder="Contraseña Admin">
+      <button class="btn" onclick="loginAdmin()">Entrar al Panel</button>
+      <button class="btn btn-secundario" onclick="cambiarVista('vistaLogin')">Volver</button>
+      <div id="msgAdminLogin" class="mensaje"></div>
+    </div>
+
+    <!-- 5. PANEL DE CONTROL DE SERVICIO HYUNDAI + OTP -->
+    <div id="vistaServicio" class="oculto">
+      <h3>Datos de Servicio Hyundai</h3>
+      <div class="caja-credenciales">
+        <div class="fila-dato">
+          <span><strong>Usuario:</strong> ccc@automotor.com.py</span>
+          <button class="btn-copiar" onclick="copiarTexto('ccc@automotor.com.py')">Copiar</button>
+        </div>
+        <div class="fila-dato">
+          <span><strong>Contraseña:</strong> Ccc*2026</span>
+          <button class="btn-copiar" onclick="copiarTexto('Ccc*2026')">Copiar</button>
+        </div>
+        <div style="margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+          <a href="https://ccc.hyundai.com/nxui/ccc/index.html" target="_blank" rel="noopener noreferrer" style="color: #0284c7; font-weight: bold; text-decoration: none;">
+            Abrir Portal Hyundai ↗
+          </a>
+        </div>
+      </div>
+
+      <div style="margin-top: 15px;">
+        <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">TOKEN DE ACCESO (GOOGLE AUTH)</span>
+        <div id="codigo" class="codigo-otp">------</div>
+        <div id="tiempo" style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">Presiona para consultar</div>
+        <button class="btn" onclick="leerCodigo()">Lectura de código</button>
+      </div>
+
+      <button class="btn btn-secundario" onclick="cerrarSesion()">Cerrar Sesión</button>
+    </div>
+
+    <!-- 6. PANEL DEL ADMINISTRADOR -->
+    <div id="vistaAdminPanel" class="oculto" style="max-width: 600px;">
+      <h2>Panel Administrador</h2>
+      <button class="btn btn-secundario" style="margin-bottom: 10px;" onclick="cargarUsuariosAdmin()">Actualizar Lista</button>
+      <div style="overflow-x: auto;">
+        <table class="tabla-admin">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Taller</th>
+              <th>Clave</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="listaUsuariosAdmin"></tbody>
+        </table>
+      </div>
+      <button class="btn btn-secundario" style="margin-top: 15px;" onclick="cerrarSesion()">Salir</button>
+    </div>
   </div>
 
   <script>
-    // Tu clave de vinculación incorporada directamente
-    const CLAVE_SECRETA = "QO6YTQ7KZU72VX7N";
+    // URL DE FIREBASE CONFIGURADA
+    const FIREBASE_URL = "https://hyundai-auth-default-rtdb.firebaseio.com/usuarios";
+    
+    // CLAVE OTP Y CREDENCIALES ADMIN
+    const CLAVE_SECRETA_OTP = "QO6YTQ7KZU72VX7N";
+    const ADMIN_USER = "esteban388";
+    const ADMIN_PASS = "esteban388";
 
     const totp = new OTPAuth.TOTP({
       issuer: "Google",
-      label: "Acceso",
+      label: "Hyundai",
       algorithm: "SHA1",
       digits: 6,
       period: 30,
-      secret: OTPAuth.Secret.fromBase32(CLAVE_SECRETA)
+      secret: OTPAuth.Secret.fromBase32(CLAVE_SECRETA_OTP)
     });
 
     let temporizador = null;
 
+    function cambiarVista(vistaId) {
+      const vistas = ['vistaLogin', 'vistaRegistro', 'vistaReset', 'vistaAdminLogin', 'vistaServicio', 'vistaAdminPanel'];
+      vistas.forEach(v => document.getElementById(v).classList.add('oculto'));
+      document.getElementById(vistaId).classList.remove('oculto');
+    }
+
+    // REGISTRO DE USUARIO
+    async function registrarUsuario() {
+      const id = document.getElementById("regId").value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+      const taller = document.getElementById("regTaller").value.trim();
+      const pass = document.getElementById("regPass").value;
+      const msg = document.getElementById("msgReg");
+
+      if (!id || !taller || !pass) {
+        msg.innerHTML = "<span style='color:red;'>Completa todos los campos.</span>";
+        return;
+      }
+
+      msg.innerText = "Registrando...";
+      try {
+        const resp = await fetch(`${FIREBASE_URL}/${id}.json`);
+        const existente = await resp.json();
+        if (existente) {
+          msg.innerHTML = "<span style='color:red;'>Este ID ya está registrado.</span>";
+          return;
+        }
+
+        await fetch(`${FIREBASE_URL}/${id}.json`, {
+          method: "PUT",
+          body: JSON.stringify({ id, taller, pass, estado: "pendiente" })
+        });
+
+        msg.innerHTML = "<span style='color:green;'>Registro enviado. Espera que el administrador te apruebe.</span>";
+        document.getElementById("regId").value = "";
+        document.getElementById("regTaller").value = "";
+        document.getElementById("regPass").value = "";
+      } catch (e) {
+        msg.innerHTML = "<span style='color:red;'>Error de conexión con la base de datos.</span>";
+      }
+    }
+
+    // INICIO DE SESIÓN DE TALLER
+    async function iniciarSesion() {
+      const id = document.getElementById("loginId").value.trim().toLowerCase();
+      const pass = document.getElementById("loginPass").value;
+      const msg = document.getElementById("msgLogin");
+
+      if (!id || !pass) {
+        msg.innerHTML = "<span style='color:red;'>Ingresa ID y contraseña.</span>";
+        return;
+      }
+
+      msg.innerText = "Comprobando acceso...";
+      try {
+        const resp = await fetch(`${FIREBASE_URL}/${id}.json`);
+        const user = await resp.json();
+
+        if (!user || user.pass !== pass) {
+          msg.innerHTML = "<span style='color:red;'>ID o contraseña incorrectos.</span>";
+          return;
+        }
+
+        if (user.estado === "pendiente") {
+          msg.innerHTML = "<span style='color:#b45309;'>Tu cuenta está pendiente de aprobación por el administrador.</span>";
+          return;
+        }
+
+        msg.innerText = "";
+        cambiarVista('vistaServicio');
+        leerCodigo();
+      } catch (e) {
+        msg.innerHTML = "<span style='color:red;'>Error de conexión.</span>";
+      }
+    }
+
+    // SOLICITUD DE RESETEO DE CONTRASEÑA
+    async function solicitarReset() {
+      const id = document.getElementById("resetId").value.trim().toLowerCase();
+      const nuevoPass = document.getElementById("resetNuevoPass").value;
+      const msg = document.getElementById("msgReset");
+
+      if (!id || !nuevoPass) {
+        msg.innerHTML = "<span style='color:red;'>Completa los dos campos.</span>";
+        return;
+      }
+
+      msg.innerText = "Enviando solicitud...";
+      try {
+        const resp = await fetch(`${FIREBASE_URL}/${id}.json`);
+        const user = await resp.json();
+
+        if (!user) {
+          msg.innerHTML = "<span style='color:red;'>El ID ingresado no existe.</span>";
+          return;
+        }
+
+        await fetch(`${FIREBASE_URL}/${id}.json`, {
+          method: "PATCH",
+          body: JSON.stringify({ passSolicitado: nuevoPass, estado: "reseteo_solicitado" })
+        });
+
+        msg.innerHTML = "<span style='color:green;'>Solicitud enviada al administrador.</span>";
+        document.getElementById("resetId").value = "";
+        document.getElementById("resetNuevoPass").value = "";
+      } catch (e) {
+        msg.innerHTML = "<span style='color:red;'>Error al procesar la solicitud.</span>";
+      }
+    }
+
+    // INGRESO AL PANEL DE ADMINISTRADOR
+    function loginAdmin() {
+      const u = document.getElementById("adminUser").value.trim();
+      const p = document.getElementById("adminPass").value;
+      const msg = document.getElementById("msgAdminLogin");
+
+      if (u === ADMIN_USER && p === ADMIN_PASS) {
+        msg.innerText = "";
+        cambiarVista('vistaAdminPanel');
+        cargarUsuariosAdmin();
+      } else {
+        msg.innerHTML = "<span style='color:red;'>Usuario o clave de admin incorrectos.</span>";
+      }
+    }
+
+    // GESTIÓN DE USUARIOS POR EL ADMINISTRADOR
+    async function cargarUsuariosAdmin() {
+      const tbody = document.getElementById("listaUsuariosAdmin");
+      tbody.innerHTML = "<tr><td colspan='5'>Cargando registros...</td></tr>";
+
+      try {
+        const resp = await fetch(`${FIREBASE_URL}.json`);
+        const data = await resp.json();
+        tbody.innerHTML = "";
+
+        if (!data) {
+          tbody.innerHTML = "<tr><td colspan='5'>No hay talleres registrados aún.</td></tr>";
+          return;
+        }
+
+        Object.keys(data).forEach(id => {
+          const u = data[id];
+          const tr = document.createElement("tr");
+
+          let badge = "";
+          let acciones = "";
+
+          if (u.estado === "pendiente") {
+            badge = `<span class="badge badge-pendiente">Pendiente</span>`;
+            acciones += `<button class="btn-exito" onclick="aprobarUsuario('${id}')">Aprobar</button> `;
+          } else if (u.estado === "reseteo_solicitado") {
+            badge = `<span class="badge badge-reseteo">Pide: ${u.passSolicitado}</span>`;
+            acciones += `<button class="btn-exito" onclick="aprobarReset('${id}', '${u.passSolicitado}')">Aceptar Cambio</button> `;
+          } else {
+            badge = `<span class="badge badge-aprobado">Aprobado</span>`;
+          }
+
+          acciones += `<button class="btn-secundario" style="padding:5px 8px; font-size:0.75rem;" onclick="cambiarClaveAdmin('${id}')">Cambiar Clave</button> `;
+          acciones += `<button class="btn-peligro" onclick="eliminarUsuario('${id}')">Eliminar</button>`;
+
+          tr.innerHTML = `
+            <td><strong>${u.id}</strong></td>
+            <td>${u.taller}</td>
+            <td><code>${u.pass}</code></td>
+            <td>${badge}</td>
+            <td>${acciones}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {
+        tbody.innerHTML = "<tr><td colspan='5'>Error cargando la lista.</td></tr>";
+      }
+    }
+
+    async function aprobarUsuario(id) {
+      await fetch(`${FIREBASE_URL}/${id}.json`, {
+        method: "PATCH",
+        body: JSON.stringify({ estado: "aprobado" })
+      });
+      cargarUsuariosAdmin();
+    }
+
+    async function aprobarReset(id, nuevoPass) {
+      await fetch(`${FIREBASE_URL}/${id}.json`, {
+        method: "PATCH",
+        body: JSON.stringify({ pass: nuevoPass, estado: "aprobado", passSolicitado: null })
+      });
+      cargarUsuariosAdmin();
+    }
+
+    async function cambiarClaveAdmin(id) {
+      const nueva = prompt("Ingresa la nueva contraseña para el taller " + id + ":");
+      if (nueva && nueva.trim() !== "") {
+        await fetch(`${FIREBASE_URL}/${id}.json`, {
+          method: "PATCH",
+          body: JSON.stringify({ pass: nueva.trim() })
+        });
+        cargarUsuariosAdmin();
+      }
+    }
+
+    async function eliminarUsuario(id) {
+      if (confirm("¿Estás seguro de que deseas eliminar el acceso al taller " + id + "?")) {
+        await fetch(`${FIREBASE_URL}/${id}.json`, { method: "DELETE" });
+        cargarUsuariosAdmin();
+      }
+    }
+
+    // GENERADOR DEL CÓDIGO OTP
     function leerCodigo() {
-      // 1. Genera el código actual idéntico a la app móvil
       const token = totp.generate();
       document.getElementById("codigo").innerText = token.slice(0, 3) + " " + token.slice(3);
-      document.getElementById("estado").innerText = "Código leído correctamente";
 
-      // 2. Calcula los segundos restantes del ciclo de 30 segundos
       const tiempoActual = Math.floor(Date.now() / 1000);
-      let segundosRestantes = 30 - (tiempoActual % 30);
+      let restantes = 30 - (tiempoActual % 30);
 
-      // 3. Inicia la cuenta regresiva en pantalla
       clearInterval(temporizador);
-      document.getElementById("tiempo").innerText = "Expira en: " + segundosRestantes + "s";
+      document.getElementById("tiempo").innerText = "Expira en: " + restantes + "s";
 
       temporizador = setInterval(() => {
-        segundosRestantes--;
-        if (segundosRestantes <= 0) {
+        restantes--;
+        if (restantes <= 0) {
           clearInterval(temporizador);
           document.getElementById("tiempo").innerText = "Código expirado. Vuelve a presionar.";
         } else {
-          document.getElementById("tiempo").innerText = "Expira en: " + segundosRestantes + "s";
+          document.getElementById("tiempo").innerText = "Expira en: " + restantes + "s";
         }
       }, 1000);
     }
-  </script>
 
+    function copiarTexto(txt) {
+      navigator.clipboard.writeText(txt).then(() => {
+        alert("Copiado al portapapeles: " + txt);
+      });
+    }
+
+    function cerrarSesion() {
+      clearInterval(temporizador);
+      cambiarVista('vistaLogin');
+      document.getElementById("loginId").value = "";
+      document.getElementById("loginPass").value = "";
+      document.getElementById("adminUser").value = "";
+      document.getElementById("adminPass").value = "";
+      document.getElementById("msgLogin").innerText = "";
+    }
+  </script>
 </body>
 </html>
