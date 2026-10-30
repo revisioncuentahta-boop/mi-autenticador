@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Librería TOTP (Google Authenticator) -->
+  <!-- Librería TOTP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/otpauth/9.1.4/otpauth.umd.min.js"></script>
 
   <style>
@@ -52,20 +52,19 @@
       overflow-x: hidden;
     }
 
-    /* Marca de agua de fondo con el logo */
     body::before {
       content: "";
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 360px;
-      height: 360px;
+      width: 340px;
+      height: 340px;
       background-image: url('logo-posventa.png');
       background-repeat: no-repeat;
       background-position: center;
       background-size: contain;
-      opacity: 0.07;
+      opacity: 0.08;
       pointer-events: none;
       z-index: 0;
     }
@@ -100,13 +99,11 @@
       display: block;
       object-fit: contain;
       border-radius: 18px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     }
 
     .header h1 {
       font-size: 20px;
       font-weight: 700;
-      letter-spacing: 0.5px;
     }
 
     .header p {
@@ -126,7 +123,6 @@
       color: var(--text-muted);
       margin-bottom: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     .input-box {
@@ -152,12 +148,6 @@
       color: #ffffff;
       font-size: 14px;
       outline: none;
-      transition: border-color 0.2s, background 0.2s;
-    }
-
-    .input-box input:focus {
-      border-color: var(--primary);
-      background: rgba(255, 255, 255, 0.1);
     }
 
     .btn {
@@ -172,7 +162,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: background 0.2s, transform 0.1s;
+      margin-top: 10px;
     }
 
     .btn:active {
@@ -184,22 +174,16 @@
       color: #ffffff;
     }
 
-    .btn-primary:hover {
-      background: var(--primary-hover);
-    }
-
     .btn-outline {
       background: transparent;
       border: 1px solid var(--card-border);
       color: var(--text);
-      margin-top: 10px;
     }
 
     .btn-admin {
       background: rgba(255, 255, 255, 0.08);
       color: var(--text-muted);
       border: 1px dashed var(--card-border);
-      margin-top: 12px;
     }
 
     .auth-box {
@@ -294,7 +278,6 @@
       border-radius: 30px;
       font-size: 13px;
       font-weight: 700;
-      box-shadow: 0 4px 16px rgba(0, 230, 118, 0.4);
       display: none;
       z-index: 999;
     }
@@ -307,7 +290,7 @@
     }
 
     .admin-table th, .admin-table td {
-      padding: 10px 6px;
+      padding: 8px 4px;
       text-align: left;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       vertical-align: middle;
@@ -315,13 +298,11 @@
 
     .admin-table th {
       color: var(--text-muted);
-      font-weight: 600;
     }
 
     .status-badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 12px;
+      padding: 2px 6px;
+      border-radius: 10px;
       font-size: 10px;
       font-weight: 700;
     }
@@ -339,19 +320,15 @@
     .action-group {
       display: flex;
       gap: 4px;
-      flex-wrap: wrap;
     }
 
     .action-btn {
-      padding: 6px 8px;
+      padding: 5px 8px;
       border-radius: 6px;
       border: none;
       cursor: pointer;
       font-size: 11px;
       font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
     }
 
     .action-btn-approve {
@@ -374,10 +351,10 @@
 
   <div class="container">
     
-    <!-- VISTA 1: INICIO DE SESIÓN TALLERES -->
+    <!-- VISTA 1: LOGIN -->
     <div id="view-login" class="card">
       <div class="header">
-        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Posventa Automotor" class="brand-img">
+        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Logo" class="brand-img">
         <h1>POSVENTA AUTOMOTOR</h1>
         <p>Acceso a Plataforma Técnica Hyundai</p>
       </div>
@@ -400,23 +377,23 @@
         </div>
       </div>
 
-      <button class="btn btn-primary" onclick="loginTaller()">
+      <button type="button" class="btn btn-primary" onclick="loginTaller()">
         <i class="fa-solid fa-right-to-bracket"></i> Ingresar al Portal
       </button>
 
-      <button class="btn btn-outline" onclick="mostrarVista('view-register')">
+      <button type="button" class="btn btn-outline" onclick="mostrarVista('view-register')">
         <i class="fa-solid fa-user-plus"></i> Solicitar Registro
       </button>
 
-      <button class="btn btn-admin" onclick="mostrarVista('view-admin-login')">
+      <button type="button" class="btn btn-admin" onclick="mostrarVista('view-admin-login')">
         <i class="fa-solid fa-shield-halved"></i> Panel de Administración
       </button>
     </div>
 
-    <!-- VISTA 2: REGISTRO DE NUEVO TALLER -->
+    <!-- VISTA 2: REGISTRO -->
     <div id="view-register" class="card" style="display: none;">
       <div class="header">
-        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Posventa Automotor" class="brand-img">
+        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Logo" class="brand-img">
         <h1>SOLICITUD DE ACCESO</h1>
         <p>Registro para Talleres Autorizados</p>
       </div>
@@ -439,19 +416,19 @@
         </div>
       </div>
 
-      <button class="btn btn-primary" onclick="registrarTaller()">
+      <button type="button" class="btn btn-primary" onclick="registrarTaller()">
         <i class="fa-solid fa-paper-plane"></i> Enviar Solicitud
       </button>
 
-      <button class="btn btn-outline" onclick="mostrarVista('view-login')">
+      <button type="button" class="btn btn-outline" onclick="mostrarVista('view-login')">
         <i class="fa-solid fa-arrow-left"></i> Volver al Login
       </button>
     </div>
 
-    <!-- VISTA 3: CREDENCIALES Y GOOGLE AUTHENTICATOR -->
+    <!-- VISTA 3: PORTAL Y OTP -->
     <div id="view-portal" class="card" style="display: none;">
       <div class="header">
-        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Posventa Automotor" class="brand-img">
+        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Logo" class="brand-img">
         <h1 id="taller-nombre-display">TALLER AUTORIZADO</h1>
         <p>Acceso Oficial Posventa Hyundai</p>
       </div>
@@ -484,15 +461,15 @@
         </p>
       </div>
 
-      <button class="btn btn-outline" onclick="cerrarSesion()">
+      <button type="button" class="btn btn-outline" onclick="cerrarSesion()">
         <i class="fa-solid fa-arrow-right-from-bracket"></i> Salir
       </button>
     </div>
 
-    <!-- VISTA 4: LOGIN ADMINISTRADOR -->
+    <!-- VISTA 4: LOGIN ADMIN -->
     <div id="view-admin-login" class="card" style="display: none;">
       <div class="header">
-        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Posventa Automotor" class="brand-img">
+        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Logo" class="brand-img">
         <h1>ADMINISTRACIÓN</h1>
         <p>Gestión de Talleres Automotor</p>
       </div>
@@ -515,19 +492,19 @@
         </div>
       </div>
 
-      <button class="btn btn-primary" onclick="loginAdmin()">
+      <button type="button" class="btn btn-primary" onclick="loginAdmin()">
         <i class="fa-solid fa-unlock"></i> Ingresar al Panel
       </button>
 
-      <button class="btn btn-outline" onclick="mostrarVista('view-login')">
+      <button type="button" class="btn btn-outline" onclick="mostrarVista('view-login')">
         <i class="fa-solid fa-arrow-left"></i> Volver
       </button>
     </div>
 
-    <!-- VISTA 5: PANEL DE CONTROL DE ADMINISTRADOR -->
+    <!-- VISTA 5: PANEL ADMIN -->
     <div id="view-admin-panel" class="card" style="display: none; max-width: 650px;">
       <div class="header">
-        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Posventa Automotor" class="brand-img">
+        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Logo" class="brand-img">
         <h1>PANEL DE CONTROL</h1>
         <p>Gestión y contraseñas de talleres</p>
       </div>
@@ -543,12 +520,11 @@
             </tr>
           </thead>
           <tbody id="admin-users-list">
-            <!-- Cargado dinámico desde Firebase -->
           </tbody>
         </table>
       </div>
 
-      <button class="btn btn-outline" style="margin-top: 20px;" onclick="mostrarVista('view-login')">
+      <button type="button" class="btn btn-outline" style="margin-top: 20px;" onclick="mostrarVista('view-login')">
         <i class="fa-solid fa-arrow-left"></i> Salir del Panel
       </button>
     </div>
@@ -558,193 +534,207 @@
   <div id="toast" class="toast">Texto copiado</div>
 
   <script>
-    const TOTP_SECRET = 'QO6YTQ7KZU72VX7N';
-    const FIREBASE_BASE_URL = 'https://hyundai-auth-default-rtdb.firebaseio.com/usuarios';
+    var TOTP_SECRET = 'QO6YTQ7KZU72VX7N';
+    var FIREBASE_URL = 'https://hyundai-auth-default-rtdb.firebaseio.com/usuarios';
 
-    const totp = new OTPAuth.TOTP({
-      issuer: 'Hyundai',
-      label: 'Automotor',
-      algorithm: 'SHA1',
-      digits: 6,
-      period: 30,
-      secret: OTPAuth.Secret.fromBase32(TOTP_SECRET)
-    });
-
-    let otpInterval = null;
-
-    // Extractor universal de contraseñas para evitar errores de campo
-    function extraerPassword(u) {
-      if (!u) return '';
-      if (u.password !== undefined && u.password !== null) return String(u.password).trim();
-      if (u.pass !== undefined && u.pass !== null) return String(u.pass).trim();
-      if (u.clave !== undefined && u.clave !== null) return String(u.clave).trim();
-      if (u.contraseña !== undefined && u.contraseña !== null) return String(u.contraseña).trim();
-      if (u.pin !== undefined && u.pin !== null) return String(u.pin).trim();
-      return '';
+    var totp = null;
+    try {
+      totp = new OTPAuth.TOTP({
+        issuer: 'Hyundai',
+        label: 'Automotor',
+        algorithm: 'SHA1',
+        digits: 6,
+        period: 30,
+        secret: OTPAuth.Secret.fromBase32(TOTP_SECRET)
+      });
+    } catch (e) {
+      console.log('Error al inicializar TOTP', e);
     }
 
-    // Extractor universal de identificador/nombre del taller
-    function extraerId(u) {
-      if (!u) return '';
-      if (u.id !== undefined && u.id !== null) return String(u.id).trim();
-      if (u.taller !== undefined && u.taller !== null) return String(u.taller).trim();
-      if (u.nombre !== undefined && u.nombre !== null) return String(u.nombre).trim();
-      if (u.usuario !== undefined && u.usuario !== null) return String(u.usuario).trim();
+    var otpInterval = null;
+
+    function getCampo(obj, opciones) {
+      if (!obj) return '';
+      for (var i = 0; i < opciones.length; i++) {
+        var k = opciones[i];
+        if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== '') {
+          return String(obj[k]).trim();
+        }
+      }
       return '';
     }
 
     function mostrarVista(vistaId) {
-      const vistas = ['view-login', 'view-register', 'view-portal', 'view-admin-login', 'view-admin-panel'];
-      vistas.forEach(v => {
-        document.getElementById(v).style.display = (v === vistaId) ? 'block' : 'none';
-      });
-      document.querySelectorAll('.alert').forEach(a => a.style.display = 'none');
+      var vistas = ['view-login', 'view-register', 'view-portal', 'view-admin-login', 'view-admin-panel'];
+      for (var i = 0; i < vistas.length; i++) {
+        var el = document.getElementById(vistas[i]);
+        if (el) el.style.display = (vistas[i] === vistaId) ? 'block' : 'none';
+      }
+      var alertas = document.querySelectorAll('.alert');
+      for (var j = 0; j < alertas.length; j++) {
+        alertas[j].style.display = 'none';
+      }
     }
 
     function mostrarAlerta(id, texto) {
-      const el = document.getElementById(id);
-      el.textContent = texto;
-      el.style.display = 'block';
+      var el = document.getElementById(id);
+      if (el) {
+        el.textContent = texto;
+        el.style.display = 'block';
+      }
     }
 
     function mostrarToast(texto) {
-      const toast = document.getElementById('toast');
-      toast.textContent = texto;
-      toast.style.display = 'block';
-      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+      var toast = document.getElementById('toast');
+      if (toast) {
+        toast.textContent = texto;
+        toast.style.display = 'block';
+        setTimeout(function() { toast.style.display = 'none'; }, 2000);
+      }
     }
 
     function copiarTexto(texto) {
-      navigator.clipboard.writeText(texto).then(() => {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto).then(function() {
+          mostrarToast('Copiado al portapapeles');
+        });
+      } else {
+        var dummy = document.createElement("input");
+        document.body.appendChild(dummy);
+        dummy.value = texto;
+        dummy.select();
+        document.execCommand("copy");
+        document.body.removeChild(dummy);
         mostrarToast('Copiado al portapapeles');
-      });
+      }
     }
 
     function copiarOTP() {
-      const codigo = document.getElementById('otp-code').textContent;
-      if (codigo && codigo !== '------') {
-        copiarTexto(codigo);
+      var el = document.getElementById('otp-code');
+      if (el && el.textContent && el.textContent !== '------') {
+        copiarTexto(el.textContent);
       }
     }
 
     function iniciarGeneradorOTP() {
       if (otpInterval) clearInterval(otpInterval);
+      if (!totp) return;
 
       function actualizar() {
-        const codigo = totp.generate();
-        document.getElementById('otp-code').textContent = codigo;
+        var codigo = totp.generate();
+        var codeEl = document.getElementById('otp-code');
+        if (codeEl) codeEl.textContent = codigo;
 
-        const epoch = Math.floor(Date.now() / 1000);
-        const restantes = 30 - (epoch % 30);
-        const porcentaje = (restantes / 30) * 100;
-        document.getElementById('otp-progress').style.width = porcentaje + '%';
+        var epoch = Math.floor(Date.now() / 1000);
+        var restantes = 30 - (epoch % 30);
+        var porcentaje = (restantes / 30) * 100;
+        var barEl = document.getElementById('otp-progress');
+        if (barEl) barEl.style.width = porcentaje + '%';
       }
 
       actualizar();
       otpInterval = setInterval(actualizar, 1000);
     }
 
-    // Inicio de sesión de talleres
-    async function loginTaller() {
-      const idInput = document.getElementById('login-id').value.trim();
-      const passInput = document.getElementById('login-pass').value.trim();
+    function loginTaller() {
+      var idInput = document.getElementById('login-id').value.trim();
+      var passInput = document.getElementById('login-pass').value.trim();
 
       if (!idInput || !passInput) {
         mostrarAlerta('login-error', 'Por favor ingresa tu taller y contraseña');
         return;
       }
 
-      try {
-        const resp = await fetch(`${FIREBASE_BASE_URL}.json`);
-        const data = await resp.json();
+      fetch(FIREBASE_URL + '.json')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var encontrado = null;
+          var passReal = '';
+          var nombreReal = '';
 
-        let encontrado = null;
-        let passReal = '';
-
-        if (data) {
-          for (const key in data) {
-            const u = data[key];
-            if (u && extraerId(u).toLowerCase() === idInput.toLowerCase()) {
-              encontrado = u;
-              passReal = extraerPassword(u);
-              break;
+          if (data) {
+            for (var key in data) {
+              var u = data[key];
+              var id = getCampo(u, ['id', 'taller', 'nombre', 'usuario']);
+              if (id.toLowerCase() === idInput.toLowerCase()) {
+                encontrado = u;
+                nombreReal = id;
+                passReal = getCampo(u, ['password', 'pass', 'clave', 'contraseña', 'pin']);
+                break;
+              }
             }
           }
-        }
 
-        if (!encontrado) {
-          mostrarAlerta('login-error', 'Taller no encontrado. Solicita registro.');
-          return;
-        }
+          if (!encontrado) {
+            mostrarAlerta('login-error', 'Taller no encontrado. Solicita registro.');
+            return;
+          }
 
-        if (passReal !== passInput) {
-          mostrarAlerta('login-error', 'Contraseña incorrecta');
-          return;
-        }
+          if (passReal !== passInput) {
+            mostrarAlerta('login-error', 'Contraseña incorrecta');
+            return;
+          }
 
-        if (!encontrado.aprobado) {
-          mostrarAlerta('login-error', 'Tu cuenta está pendiente de aprobación por Automotor');
-          return;
-        }
+          if (!encontrado.aprobado) {
+            mostrarAlerta('login-error', 'Tu cuenta está pendiente de aprobación por Automotor');
+            return;
+          }
 
-        document.getElementById('taller-nombre-display').textContent = extraerId(encontrado).toUpperCase();
-        mostrarVista('view-portal');
-        iniciarGeneradorOTP();
-
-      } catch (err) {
-        mostrarAlerta('login-error', 'Error de conexión con la base de datos');
-      }
+          document.getElementById('taller-nombre-display').textContent = nombreReal.toUpperCase();
+          mostrarVista('view-portal');
+          iniciarGeneradorOTP();
+        })
+        .catch(function(err) {
+          mostrarAlerta('login-error', 'Error de conexión con Firebase');
+        });
     }
 
-    // Registro de talleres
-    async function registrarTaller() {
-      const id = document.getElementById('reg-id').value.trim();
-      const pass = document.getElementById('reg-pass').value.trim();
+    function registrarTaller() {
+      var id = document.getElementById('reg-id').value.trim();
+      var pass = document.getElementById('reg-pass').value.trim();
 
       if (!id || !pass) {
         mostrarAlerta('register-msg', 'Completa todos los campos');
         return;
       }
 
-      try {
-        const resp = await fetch(`${FIREBASE_BASE_URL}.json`);
-        const data = await resp.json();
-
-        if (data) {
-          for (const key in data) {
-            const u = data[key];
-            if (u && extraerId(u).toLowerCase() === id.toLowerCase()) {
-              mostrarAlerta('register-msg', 'Este taller ya se encuentra registrado');
-              return;
+      fetch(FIREBASE_URL + '.json')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data) {
+            for (var key in data) {
+              var u = data[key];
+              var nombre = getCampo(u, ['id', 'taller', 'nombre', 'usuario']);
+              if (nombre.toLowerCase() === id.toLowerCase()) {
+                mostrarAlerta('register-msg', 'Este taller ya se encuentra registrado');
+                return;
+              }
             }
           }
-        }
 
-        await fetch(`${FIREBASE_BASE_URL}.json`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: id,
-            password: String(pass),
-            aprobado: false,
-            fecha: new Date().toISOString()
-          })
+          fetch(FIREBASE_URL + '.json', {
+            method: 'POST',
+            body: JSON.stringify({
+              id: id,
+              password: pass,
+              aprobado: false,
+              fecha: new Date().toISOString()
+            })
+          }).then(function() {
+            alert('Solicitud enviada con éxito. Automotor revisará tu autorización.');
+            document.getElementById('reg-id').value = '';
+            document.getElementById('reg-pass').value = '';
+            mostrarVista('view-login');
+          });
+        })
+        .catch(function() {
+          mostrarAlerta('register-msg', 'Error de conexión al enviar la solicitud');
         });
-
-        alert('Solicitud enviada con éxito. Automotor revisará tu autorización.');
-        document.getElementById('reg-id').value = '';
-        document.getElementById('reg-pass').value = '';
-        mostrarVista('view-login');
-
-      } catch (e) {
-        mostrarAlerta('register-msg', 'No se pudo enviar la solicitud');
-      }
     }
 
-    // Login Administrador
     function loginAdmin() {
-      const u = document.getElementById('admin-user').value.trim();
-      const p = document.getElementById('admin-pass').value.trim();
+      var u = document.getElementById('admin-user').value.trim();
+      var p = document.getElementById('admin-pass').value.trim();
 
       if (u === 'esteban388' && p === 'esteban388') {
         mostrarVista('view-admin-panel');
@@ -754,7 +744,93 @@
       }
     }
 
-    // Cargar tabla del Administrador
-    async function cargarUsuariosAdmin() {
-      const tabla = document.getElementById('admin-users-list');
-      tabla.innerHTML = '<tr><td colspan="4">Cargando
+    function cargarUsuariosAdmin() {
+      var tabla = document.getElementById('admin-users-list');
+      tabla.innerHTML = '<tr><td colspan="4">Cargando talleres...</td></tr>';
+
+      fetch(FIREBASE_URL + '.json')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          tabla.innerHTML = '';
+          if (!data) {
+            tabla.innerHTML = '<tr><td colspan="4">No hay talleres registrados</td></tr>';
+            return;
+          }
+
+          for (var key in data) {
+            var user = data[key];
+            if (!user) continue;
+
+            var nombre = getCampo(user, ['id', 'taller', 'nombre', 'usuario']) || '(Sin nombre)';
+            var clave = getCampo(user, ['password', 'pass', 'clave', 'contraseña', 'pin']) || '(Sin clave)';
+
+            var statusHtml = user.aprobado
+              ? '<span class="status-badge status-approved">Aprobado</span>'
+              : '<span class="status-badge status-pending">Pendiente</span>';
+
+            var accionAprobar = !user.aprobado
+              ? '<button class="action-btn action-btn-approve" onclick="aprobarUsuario(\'' + key + '\')"><i class="fa-solid fa-check"></i></button>'
+              : '';
+
+            var tr = document.createElement('tr');
+            tr.innerHTML = '<td><strong>' + nombre + '</strong></td>' +
+              '<td><code>' + clave + '</code></td>' +
+              '<td>' + statusHtml + '</td>' +
+              '<td>' +
+                '<div class="action-group">' +
+                  accionAprobar +
+                  '<button class="action-btn action-btn-pass" onclick="cambiarPassword(\'' + key + '\', \'' + nombre + '\')"><i class="fa-solid fa-key"></i></button>' +
+                  '<button class="action-btn action-btn-del" onclick="eliminarUsuario(\'' + key + '\')"><i class="fa-solid fa-trash"></i></button>' +
+                '</div>' +
+              '</td>';
+            tabla.appendChild(tr);
+          }
+        })
+        .catch(function() {
+          tabla.innerHTML = '<tr><td colspan="4">Error al cargar registros</td></tr>';
+        });
+    }
+
+    function aprobarUsuario(key) {
+      fetch(FIREBASE_URL + '/' + key + '.json', {
+        method: 'PATCH',
+        body: JSON.stringify({ aprobado: true })
+      }).then(function() {
+        cargarUsuariosAdmin();
+        mostrarToast('Taller aprobado');
+      });
+    }
+
+    function cambiarPassword(key, tallerNombre) {
+      var nueva = prompt('Ingresa la nueva contraseña para el taller ' + tallerNombre + ':');
+      if (nueva && nueva.trim() !== '') {
+        fetch(FIREBASE_URL + '/' + key + '.json', {
+          method: 'PATCH',
+          body: JSON.stringify({ password: nueva.trim() })
+        }).then(function() {
+          cargarUsuariosAdmin();
+          mostrarToast('Contraseña actualizada');
+        });
+      }
+    }
+
+    function eliminarUsuario(key) {
+      if (confirm('¿Eliminar este taller?')) {
+        fetch(FIREBASE_URL + '/' + key + '.json', {
+          method: 'DELETE'
+        }).then(function() {
+          cargarUsuariosAdmin();
+          mostrarToast('Taller eliminado');
+        });
+      }
+    }
+
+    function cerrarSesion() {
+      if (otpInterval) clearInterval(otpInterval);
+      document.getElementById('login-id').value = '';
+      document.getElementById('login-pass').value = '';
+      mostrarVista('view-login');
+    }
+  </script>
+</body>
+</html>
