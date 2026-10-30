@@ -2,498 +2,789 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal de Acceso - Taller Hyundai</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/otpauth/9.2.2/otpauth.umd.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Portal Posventa - Automotor</title>
+
+  <!-- Fuentes e Iconos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Librería para el cálculo del código TOTP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/otpauth/9.1.4/otpauth.umd.min.js"></script>
+
   <style>
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #f0f2f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 15px;
-      box-sizing: border-box;
+    :root {
+      --bg-dark: #051329;
+      --bg-gradient: radial-gradient(circle at 50% 0%, #0d274d 0%, #051329 100%);
+      --card-bg: rgba(255, 255, 255, 0.05);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --primary: #0072d8;
+      --primary-hover: #005bb5;
+      --accent: #00e5ff;
+      --danger: #ff4d4d;
+      --success: #00e676;
+      --text: #ffffff;
+      --text-muted: #8fa0bc;
     }
-    .tarjeta {
-      background: #ffffff;
-      padding: 28px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      background-color: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Marca de agua fija centrada en el fondo con el logo */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 360px;
+      height: 360px;
+      background-image: url('logo-posventa.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      opacity: 0.07;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
       width: 100%;
       max-width: 440px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Tarjeta principal con efecto Glassmorphism */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+      margin-bottom: 20px;
+    }
+
+    /* Cabecera y Logo */
+    .header {
       text-align: center;
-      box-sizing: border-box;
+      margin-bottom: 24px;
     }
-    h2, h3 { margin-top: 0; color: #002c5f; }
-    input {
+
+    .brand-img {
+      width: 86px;
+      height: 86px;
+      margin: 0 auto 14px;
+      display: block;
+      object-fit: contain;
+      border-radius: 18px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+
+    .header h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Formularios */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-box {
+      position: relative;
+    }
+
+    .input-box i {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .input-box input {
       width: 100%;
-      padding: 11px;
-      margin: 6px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
-      font-size: 0.95rem;
+      height: 48px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 0 16px 0 42px;
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
     }
+
+    .input-box input:focus {
+      border-color: var(--primary);
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Botones */
     .btn {
-      background: #002c5f;
-      color: white;
-      border: none;
-      padding: 12px;
-      font-size: 0.95rem;
-      font-weight: bold;
-      border-radius: 6px;
-      cursor: pointer;
       width: 100%;
-      margin-top: 8px;
-      transition: background 0.2s;
-    }
-    .btn:hover { background: #001e40; }
-    .btn-secundario {
-      background: #f1f5f9;
-      color: #334155;
-      border: 1px solid #cbd5e1;
-      margin-top: 8px;
-    }
-    .btn-secundario:hover { background: #e2e8f0; }
-    .btn-peligro { background: #dc2626; color: white; padding: 6px 10px; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; }
-    .btn-exito { background: #16a34a; color: white; padding: 6px 10px; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; }
-    .btn-copiar {
-      background: #eef2f6;
-      border: 1px solid #cbd5e1;
-      padding: 5px 10px;
-      border-radius: 4px;
+      height: 48px;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
       cursor: pointer;
-      font-size: 0.8rem;
-    }
-    .btn-copiar:hover { background: #dbe4ee; }
-    .enlaces-pie {
       display: flex;
-      justify-content: space-between;
-      margin-top: 15px;
-      font-size: 0.85rem;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.2s, transform 0.1s;
     }
-    .enlaces-pie a { color: #0284c7; text-decoration: none; cursor: pointer; font-weight: 500; }
-    .enlaces-pie a:hover { text-decoration: underline; }
-    .caja-credenciales {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 14px;
-      text-align: left;
-      margin: 15px 0;
-      font-size: 0.9rem;
+
+    .btn:active {
+      transform: scale(0.98);
     }
-    .fila-dato {
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      margin-top: 10px;
+    }
+
+    .btn-admin {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+      border: 1px dashed var(--card-border);
+      margin-top: 12px;
+    }
+
+    /* Panel de Autenticador / Credenciales */
+    .auth-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .data-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin: 6px 0;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
-    .codigo-otp {
-      font-family: monospace;
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #002c5f;
-      letter-spacing: 5px;
-      background: #e8f0fe;
-      padding: 12px;
-      border-radius: 8px;
-      margin: 12px 0 5px 0;
+
+    .data-row:last-child {
+      border-bottom: none;
     }
-    .tabla-admin {
+
+    .data-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .data-val {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .copy-icon {
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 14px;
+    }
+
+    /* Token OTP */
+    .otp-display {
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    .otp-code {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: 6px;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      cursor: pointer;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 100%;
+      background: var(--accent);
+      transition: width 1s linear;
+    }
+
+    /* Alertas y Notificaciones */
+    .alert {
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      margin-bottom: 14px;
+      display: none;
+    }
+
+    .alert-danger {
+      background: rgba(255, 77, 77, 0.15);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      background: #00e676;
+      color: #051329;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 4px 16px rgba(0, 230, 118, 0.4);
+      display: none;
+      z-index: 999;
+    }
+
+    /* Tablas de Administrador */
+    .admin-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 15px;
-      font-size: 0.8rem;
+      margin-top: 14px;
+      font-size: 12px;
+    }
+
+    .admin-table th, .admin-table td {
+      padding: 10px 6px;
       text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .tabla-admin th, .tabla-admin td {
-      border: 1px solid #e2e8f0;
-      padding: 8px;
-      vertical-align: middle;
+
+    .admin-table th {
+      color: var(--text-muted);
+      font-weight: 600;
     }
-    .tabla-admin th { background: #f1f5f9; }
-    .badge {
+
+    .status-badge {
       display: inline-block;
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: bold;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+      font-weight: 700;
     }
-    .badge-pendiente { background: #fef3c7; color: #92400e; }
-    .badge-aprobado { background: #dcfce7; color: #166534; }
-    .badge-reseteo { background: #fee2e2; color: #991b1b; }
-    .oculto { display: none; }
-    .mensaje { font-size: 0.85rem; margin-top: 8px; }
+
+    .status-approved {
+      background: rgba(0, 230, 118, 0.15);
+      color: var(--success);
+    }
+
+    .status-pending {
+      background: rgba(255, 193, 7, 0.15);
+      color: #ffc107;
+    }
+
+    .action-btn {
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .action-btn-approve {
+      background: var(--success);
+      color: #051329;
+    }
+
+    .action-btn-del {
+      background: var(--danger);
+      color: #ffffff;
+      margin-left: 4px;
+    }
   </style>
 </head>
 <body>
 
-  <div class="tarjeta">
-    <!-- 1. LOGIN DE USUARIOS (TALLERES) -->
-    <div id="vistaLogin">
-      <h2>Acceso Taller</h2>
-      <input type="text" id="loginId" placeholder="ID de Usuario">
-      <input type="password" id="loginPass" placeholder="Contraseña">
-      <button class="btn" onclick="iniciarSesion()">Ingresar</button>
-      <div id="msgLogin" class="mensaje"></div>
-
-      <div class="enlaces-pie">
-        <a onclick="cambiarVista('vistaRegistro')">Registrar Taller</a>
-        <a onclick="cambiarVista('vistaReset')">¿Olvidó contraseña?</a>
-        <a onclick="cambiarVista('vistaAdminLogin')">Admin</a>
+  <div class="container">
+    
+    <!-- VISTA 1: INICIO DE SESIÓN TALLERES -->
+    <div id="view-login" class="card">
+      <div class="header">
+        <img src="logo-posventa.png" alt="Posventa Automotor" class="brand-img">
+        <h1>POSVENTA AUTOMOTOR</h1>
+        <p>Acceso a Plataforma Técnica Hyundai</p>
       </div>
-    </div>
 
-    <!-- 2. REGISTRO DE TALLER -->
-    <div id="vistaRegistro" class="oculto">
-      <h2>Registro de Taller</h2>
-      <input type="text" id="regId" placeholder="ID deseado (sin espacios)">
-      <input type="text" id="regTaller" placeholder="Nombre del Taller Autorizado">
-      <input type="password" id="regPass" placeholder="Contraseña">
-      <button class="btn" onclick="registrarUsuario()">Solicitar Registro</button>
-      <button class="btn btn-secundario" onclick="cambiarVista('vistaLogin')">Volver</button>
-      <div id="msgReg" class="mensaje"></div>
-    </div>
+      <div id="login-error" class="alert alert-danger"></div>
 
-    <!-- 3. SOLICITUD DE RESETEO -->
-    <div id="vistaReset" class="oculto">
-      <h2>Recuperar Contraseña</h2>
-      <p style="font-size: 0.85rem; color: #64748b;">Ingresa tu ID y la nueva contraseña que deseas usar para que el administrador la autorice.</p>
-      <input type="text" id="resetId" placeholder="Tu ID de Usuario">
-      <input type="password" id="resetNuevoPass" placeholder="Nueva Contraseña deseada">
-      <button class="btn" onclick="solicitarReset()">Enviar Solicitud</button>
-      <button class="btn btn-secundario" onclick="cambiarVista('vistaLogin')">Volver</button>
-      <div id="msgReset" class="mensaje"></div>
-    </div>
-
-    <!-- 4. LOGIN ADMINISTRADOR -->
-    <div id="vistaAdminLogin" class="oculto">
-      <h2>Acceso Administrador</h2>
-      <input type="text" id="adminUser" placeholder="Usuario Admin">
-      <input type="password" id="adminPass" placeholder="Contraseña Admin">
-      <button class="btn" onclick="loginAdmin()">Entrar al Panel</button>
-      <button class="btn btn-secundario" onclick="cambiarVista('vistaLogin')">Volver</button>
-      <div id="msgAdminLogin" class="mensaje"></div>
-    </div>
-
-    <!-- 5. PANEL DE CONTROL DE SERVICIO HYUNDAI + OTP -->
-    <div id="vistaServicio" class="oculto">
-      <h3>Datos de Servicio Hyundai</h3>
-      <div class="caja-credenciales">
-        <div class="fila-dato">
-          <span><strong>Usuario:</strong> ccc@automotor.com.py</span>
-          <button class="btn-copiar" onclick="copiarTexto('ccc@automotor.com.py')">Copiar</button>
-        </div>
-        <div class="fila-dato">
-          <span><strong>Contraseña:</strong> Ccc*2026</span>
-          <button class="btn-copiar" onclick="copiarTexto('Ccc*2026')">Copiar</button>
-        </div>
-        <div style="margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
-          <a href="https://ccc.hyundai.com/nxui/ccc/index.html" target="_blank" rel="noopener noreferrer" style="color: #0284c7; font-weight: bold; text-decoration: none;">
-            Abrir Portal Hyundai ↗
-          </a>
+      <div class="form-group">
+        <label>ID o Nombre de Taller</label>
+        <div class="input-box">
+          <i class="fa-solid fa-warehouse"></i>
+          <input type="text" id="login-id" placeholder="Ej: Taller Central">
         </div>
       </div>
 
-      <div style="margin-top: 15px;">
-        <span style="font-size: 0.85rem; color: #64748b; font-weight: 600;">TOKEN DE ACCESO (GOOGLE AUTH)</span>
-        <div id="codigo" class="codigo-otp">------</div>
-        <div id="tiempo" style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px;">Presiona para consultar</div>
-        <button class="btn" onclick="leerCodigo()">Lectura de código</button>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <div class="input-box">
+          <i class="fa-solid fa-lock"></i>
+          <input type="password" id="login-pass" placeholder="••••••••">
+        </div>
       </div>
 
-      <button class="btn btn-secundario" onclick="cerrarSesion()">Cerrar Sesión</button>
+      <button class="btn btn-primary" onclick="loginTaller()">
+        <i class="fa-solid fa-right-to-bracket"></i> Ingresar al Portal
+      </button>
+
+      <button class="btn btn-outline" onclick="mostrarVista('view-register')">
+        <i class="fa-solid fa-user-plus"></i> Solicitar Registro
+      </button>
+
+      <button class="btn btn-admin" onclick="mostrarVista('view-admin-login')">
+        <i class="fa-solid fa-shield-halved"></i> Panel de Administración
+      </button>
     </div>
 
-    <!-- 6. PANEL DEL ADMINISTRADOR -->
-    <div id="vistaAdminPanel" class="oculto" style="max-width: 600px;">
-      <h2>Panel Administrador</h2>
-      <button class="btn btn-secundario" style="margin-bottom: 10px;" onclick="cargarUsuariosAdmin()">Actualizar Lista</button>
+    <!-- VISTA 2: REGISTRO DE NUEVO TALLER -->
+    <div id="view-register" class="card" style="display: none;">
+      <div class="header">
+        <img src="logo-posventa.png" alt="Posventa Automotor" class="brand-img">
+        <h1>SOLICITUD DE ACCESO</h1>
+        <p>Registro para Talleres Autorizados</p>
+      </div>
+
+      <div id="register-msg" class="alert alert-danger"></div>
+
+      <div class="form-group">
+        <label>Nombre del Taller / Responsable</label>
+        <div class="input-box">
+          <i class="fa-solid fa-wrench"></i>
+          <input type="text" id="reg-id" placeholder="Nombre de taller">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña requerida</label>
+        <div class="input-box">
+          <i class="fa-solid fa-key"></i>
+          <input type="password" id="reg-pass" placeholder="Definir contraseña">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="registrarTaller()">
+        <i class="fa-solid fa-paper-plane"></i> Enviar Solicitud
+      </button>
+
+      <button class="btn btn-outline" onclick="mostrarVista('view-login')">
+        <i class="fa-solid fa-arrow-left"></i> Volver al Login
+      </button>
+    </div>
+
+    <!-- VISTA 3: CREDENCIALES Y GOOGLE AUTHENTICATOR (OTP) -->
+    <div id="view-portal" class="card" style="display: none;">
+      <div class="header">
+        <img src="logo-posventa.png" alt="Posventa Automotor" class="brand-img">
+        <h1 id="taller-nombre-display">TALLER AUTORIZADO</h1>
+        <p>Acceso Oficial Posventa Hyundai</p>
+      </div>
+
+      <!-- Credenciales fijas Hyundai -->
+      <div class="auth-box">
+        <div class="data-row">
+          <span class="data-label">Usuario Hyundai:</span>
+          <span class="data-val">
+            <span id="hyundai-user">ccc@automotor.com.py</span>
+            <i class="fa-regular fa-copy copy-icon" onclick="copiarTexto('ccc@automotor.com.py')"></i>
+          </span>
+        </div>
+        <div class="data-row">
+          <span class="data-label">Contraseña Hyundai:</span>
+          <span class="data-val">
+            <span id="hyundai-pass">Ccc*2026</span>
+            <i class="fa-regular fa-copy copy-icon" onclick="copiarTexto('Ccc*2026')"></i>
+          </span>
+        </div>
+      </div>
+
+      <!-- Generador de Código OTP -->
+      <div class="auth-box otp-display">
+        <span class="data-label">CÓDIGO DE VERIFICACIÓN (OTP)</span>
+        <div class="otp-code" id="otp-code" onclick="copiarOTP()">------</div>
+        <div class="progress-bar-container">
+          <div class="progress-bar" id="otp-progress"></div>
+        </div>
+        <p style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
+          Toca el código para copiar al portapapeles
+        </p>
+      </div>
+
+      <button class="btn btn-outline" onclick="cerrarSesion()">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Salir
+      </button>
+    </div>
+
+    <!-- VISTA 4: LOGIN DE ADMINISTRADOR -->
+    <div id="view-admin-login" class="card" style="display: none;">
+      <div class="header">
+        <img src="logo-posventa.png" alt="Posventa Automotor" class="brand-img">
+        <h1>ADMINISTRACIÓN</h1>
+        <p>Gestión de Talleres Automotor</p>
+      </div>
+
+      <div id="admin-login-error" class="alert alert-danger"></div>
+
+      <div class="form-group">
+        <label>Usuario</label>
+        <div class="input-box">
+          <i class="fa-solid fa-user-shield"></i>
+          <input type="text" id="admin-user" placeholder="Usuario administrador">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Contraseña</label>
+        <div class="input-box">
+          <i class="fa-solid fa-key"></i>
+          <input type="password" id="admin-pass" placeholder="••••••••">
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="loginAdmin()">
+        <i class="fa-solid fa-unlock"></i> Ingresar al Panel
+      </button>
+
+      <button class="btn btn-outline" onclick="mostrarVista('view-login')">
+        <i class="fa-solid fa-arrow-left"></i> Volver
+      </button>
+    </div>
+
+    <!-- VISTA 5: PANEL DE CONTROL DE ADMINISTRADOR -->
+    <div id="view-admin-panel" class="card" style="display: none; max-width: 600px;">
+      <div class="header">
+        <img src="logo-posventa.png" alt="Posventa Automotor" class="brand-img">
+        <h1>PANEL DE CONTROL</h1>
+        <p>Aprobación y autorización de talleres</p>
+      </div>
+
       <div style="overflow-x: auto;">
-        <table class="tabla-admin">
+        <table class="admin-table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Taller</th>
-              <th>Clave</th>
+              <th>Contraseña</th>
               <th>Estado</th>
               <th>Acción</th>
             </tr>
           </thead>
-          <tbody id="listaUsuariosAdmin"></tbody>
+          <tbody id="admin-users-list">
+            <!-- Rellenado dinámico desde Firebase -->
+          </tbody>
         </table>
       </div>
-      <button class="btn btn-secundario" style="margin-top: 15px;" onclick="cerrarSesion()">Salir</button>
+
+      <button class="btn btn-outline" style="margin-top: 20px;" onclick="mostrarVista('view-login')">
+        <i class="fa-solid fa-arrow-left"></i> Salir del Panel
+      </button>
     </div>
+
   </div>
 
+  <div id="toast" class="toast">Texto copiado</div>
+
   <script>
-    // URL DE FIREBASE CONFIGURADA
-    const FIREBASE_URL = "https://hyundai-auth-default-rtdb.firebaseio.com/usuarios";
-    
-    // CLAVE OTP Y CREDENCIALES ADMIN
-    const CLAVE_SECRETA_OTP = "QO6YTQ7KZU72VX7N";
-    const ADMIN_USER = "esteban388";
-    const ADMIN_PASS = "esteban388";
+    const TOTP_SECRET = 'QO6YTQ7KZU72VX7N';
+    const FIREBASE_URL = 'https://hyundai-auth-default-rtdb.firebaseio.com/usuarios';
 
     const totp = new OTPAuth.TOTP({
-      issuer: "Google",
-      label: "Hyundai",
-      algorithm: "SHA1",
+      issuer: 'Hyundai',
+      label: 'Automotor',
+      algorithm: 'SHA1',
       digits: 6,
       period: 30,
-      secret: OTPAuth.Secret.fromBase32(CLAVE_SECRETA_OTP)
+      secret: OTPAuth.Secret.fromBase32(TOTP_SECRET)
     });
 
-    let temporizador = null;
+    let otpInterval = null;
 
-    function cambiarVista(vistaId) {
-      const vistas = ['vistaLogin', 'vistaRegistro', 'vistaReset', 'vistaAdminLogin', 'vistaServicio', 'vistaAdminPanel'];
-      vistas.forEach(v => document.getElementById(v).classList.add('oculto'));
-      document.getElementById(vistaId).classList.remove('oculto');
+    function mostrarVista(vistaId) {
+      const vistas = ['view-login', 'view-register', 'view-portal', 'view-admin-login', 'view-admin-panel'];
+      vistas.forEach(v => {
+        document.getElementById(v).style.display = (v === vistaId) ? 'block' : 'none';
+      });
+      document.querySelectorAll('.alert').forEach(a => a.style.display = 'none');
     }
 
-    // REGISTRO DE USUARIO
-    async function registrarUsuario() {
-      const id = document.getElementById("regId").value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
-      const taller = document.getElementById("regTaller").value.trim();
-      const pass = document.getElementById("regPass").value;
-      const msg = document.getElementById("msgReg");
+    function mostrarAlerta(id, texto) {
+      const el = document.getElementById(id);
+      el.textContent = texto;
+      el.style.display = 'block';
+    }
 
-      if (!id || !taller || !pass) {
-        msg.innerHTML = "<span style='color:red;'>Completa todos los campos.</span>";
-        return;
-      }
+    function mostrarToast(texto) {
+      const toast = document.getElementById('toast');
+      toast.textContent = texto;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
 
-      msg.innerText = "Registrando...";
-      try {
-        const resp = await fetch(`${FIREBASE_URL}/${id}.json`);
-        const existente = await resp.json();
-        if (existente) {
-          msg.innerHTML = "<span style='color:red;'>Este ID ya está registrado.</span>";
-          return;
-        }
+    function copiarTexto(texto) {
+      navigator.clipboard.writeText(texto).then(() => {
+        mostrarToast('Copiado al portapapeles');
+      });
+    }
 
-        await fetch(`${FIREBASE_URL}/${id}.json`, {
-          method: "PUT",
-          body: JSON.stringify({ id, taller, pass, estado: "pendiente" })
-        });
-
-        msg.innerHTML = "<span style='color:green;'>Registro enviado. Espera que el administrador te apruebe.</span>";
-        document.getElementById("regId").value = "";
-        document.getElementById("regTaller").value = "";
-        document.getElementById("regPass").value = "";
-      } catch (e) {
-        msg.innerHTML = "<span style='color:red;'>Error de conexión con la base de datos.</span>";
+    function copiarOTP() {
+      const codigo = document.getElementById('otp-code').textContent;
+      if (codigo && codigo !== '------') {
+        copiarTexto(codigo);
       }
     }
 
-    // INICIO DE SESIÓN DE TALLER
-    async function iniciarSesion() {
-      const id = document.getElementById("loginId").value.trim().toLowerCase();
-      const pass = document.getElementById("loginPass").value;
-      const msg = document.getElementById("msgLogin");
+    function iniciarGeneradorOTP() {
+      if (otpInterval) clearInterval(otpInterval);
+
+      function actualizar() {
+        const codigo = totp.generate();
+        document.getElementById('otp-code').textContent = codigo;
+
+        const epoch = Math.floor(Date.now() / 1000);
+        const restantes = 30 - (epoch % 30);
+        const porcentaje = (restantes / 30) * 100;
+        document.getElementById('otp-progress').style.width = porcentaje + '%';
+      }
+
+      actualizar();
+      otpInterval = setInterval(actualizar, 1000);
+    }
+
+    async function loginTaller() {
+      const id = document.getElementById('login-id').value.trim();
+      const pass = document.getElementById('login-pass').value.trim();
 
       if (!id || !pass) {
-        msg.innerHTML = "<span style='color:red;'>Ingresa ID y contraseña.</span>";
+        mostrarAlerta('login-error', 'Por favor ingresa tu taller y contraseña');
         return;
       }
-
-      msg.innerText = "Comprobando acceso...";
-      try {
-        const resp = await fetch(`${FIREBASE_URL}/${id}.json`);
-        const user = await resp.json();
-
-        if (!user || user.pass !== pass) {
-          msg.innerHTML = "<span style='color:red;'>ID o contraseña incorrectos.</span>";
-          return;
-        }
-
-        if (user.estado === "pendiente") {
-          msg.innerHTML = "<span style='color:#b45309;'>Tu cuenta está pendiente de aprobación por el administrador.</span>";
-          return;
-        }
-
-        msg.innerText = "";
-        cambiarVista('vistaServicio');
-        leerCodigo();
-      } catch (e) {
-        msg.innerHTML = "<span style='color:red;'>Error de conexión.</span>";
-      }
-    }
-
-    // SOLICITUD DE RESETEO DE CONTRASEÑA
-    async function solicitarReset() {
-      const id = document.getElementById("resetId").value.trim().toLowerCase();
-      const nuevoPass = document.getElementById("resetNuevoPass").value;
-      const msg = document.getElementById("msgReset");
-
-      if (!id || !nuevoPass) {
-        msg.innerHTML = "<span style='color:red;'>Completa los dos campos.</span>";
-        return;
-      }
-
-      msg.innerText = "Enviando solicitud...";
-      try {
-        const resp = await fetch(`${FIREBASE_URL}/${id}.json`);
-        const user = await resp.json();
-
-        if (!user) {
-          msg.innerHTML = "<span style='color:red;'>El ID ingresado no existe.</span>";
-          return;
-        }
-
-        await fetch(`${FIREBASE_URL}/${id}.json`, {
-          method: "PATCH",
-          body: JSON.stringify({ passSolicitado: nuevoPass, estado: "reseteo_solicitado" })
-        });
-
-        msg.innerHTML = "<span style='color:green;'>Solicitud enviada al administrador.</span>";
-        document.getElementById("resetId").value = "";
-        document.getElementById("resetNuevoPass").value = "";
-      } catch (e) {
-        msg.innerHTML = "<span style='color:red;'>Error al procesar la solicitud.</span>";
-      }
-    }
-
-    // INGRESO AL PANEL DE ADMINISTRADOR
-    function loginAdmin() {
-      const u = document.getElementById("adminUser").value.trim();
-      const p = document.getElementById("adminPass").value;
-      const msg = document.getElementById("msgAdminLogin");
-
-      if (u === ADMIN_USER && p === ADMIN_PASS) {
-        msg.innerText = "";
-        cambiarVista('vistaAdminPanel');
-        cargarUsuariosAdmin();
-      } else {
-        msg.innerHTML = "<span style='color:red;'>Usuario o clave de admin incorrectos.</span>";
-      }
-    }
-
-    // GESTIÓN DE USUARIOS POR EL ADMINISTRADOR
-    async function cargarUsuariosAdmin() {
-      const tbody = document.getElementById("listaUsuariosAdmin");
-      tbody.innerHTML = "<tr><td colspan='5'>Cargando registros...</td></tr>";
 
       try {
         const resp = await fetch(`${FIREBASE_URL}.json`);
         const data = await resp.json();
-        tbody.innerHTML = "";
 
-        if (!data) {
-          tbody.innerHTML = "<tr><td colspan='5'>No hay talleres registrados aún.</td></tr>";
+        let encontrado = null;
+        if (data) {
+          for (const key in data) {
+            if (data[key].id.toLowerCase() === id.toLowerCase()) {
+              encontrado = data[key];
+              break;
+            }
+          }
+        }
+
+        if (!encontrado) {
+          mostrarAlerta('login-error', 'Taller no encontrado. Solicita registro.');
           return;
         }
 
-        Object.keys(data).forEach(id => {
-          const u = data[id];
-          const tr = document.createElement("tr");
+        if (encontrado.password !== pass) {
+          mostrarAlerta('login-error', 'Contraseña incorrecta');
+          return;
+        }
 
-          let badge = "";
-          let acciones = "";
+        if (!encontrado.aprobado) {
+          mostrarAlerta('login-error', 'Tu cuenta está pendiente de aprobación por Automotor');
+          return;
+        }
 
-          if (u.estado === "pendiente") {
-            badge = `<span class="badge badge-pendiente">Pendiente</span>`;
-            acciones += `<button class="btn-exito" onclick="aprobarUsuario('${id}')">Aprobar</button> `;
-          } else if (u.estado === "reseteo_solicitado") {
-            badge = `<span class="badge badge-reseteo">Pide: ${u.passSolicitado}</span>`;
-            acciones += `<button class="btn-exito" onclick="aprobarReset('${id}', '${u.passSolicitado}')">Aceptar Cambio</button> `;
-          } else {
-            badge = `<span class="badge badge-aprobado">Aprobado</span>`;
+        document.getElementById('taller-nombre-display').textContent = encontrado.id.toUpperCase();
+        mostrarVista('view-portal');
+        iniciarGeneradorOTP();
+
+      } catch (err) {
+        mostrarAlerta('login-error', 'Error al conectar con la base de datos');
+      }
+    }
+
+    async function registrarTaller() {
+      const id = document.getElementById('reg-id').value.trim();
+      const pass = document.getElementById('reg-pass').value.trim();
+
+      if (!id || !pass) {
+        mostrarAlerta('register-msg', 'Completa todos los campos');
+        return;
+      }
+
+      try {
+        const resp = await fetch(`${FIREBASE_URL}.json`);
+        const data = await resp.json();
+
+        if (data) {
+          for (const key in data) {
+            if (data[key].id.toLowerCase() === id.toLowerCase()) {
+              mostrarAlerta('register-msg', 'Este taller ya se encuentra registrado');
+              return;
+            }
           }
+        }
 
-          acciones += `<button class="btn-secundario" style="padding:5px 8px; font-size:0.75rem;" onclick="cambiarClaveAdmin('${id}')">Cambiar Clave</button> `;
-          acciones += `<button class="btn-peligro" onclick="eliminarUsuario('${id}')">Eliminar</button>`;
+        await fetch(`${FIREBASE_URL}.json`, {
+          method: 'POST',
+          body: JSON.stringify({
+            id: id,
+            password: pass,
+            aprobado: false,
+            fecha: new Date().toISOString()
+          })
+        });
+
+        alert('Solicitud enviada con éxito. Automotor revisará tu autorización.');
+        document.getElementById('reg-id').value = '';
+        document.getElementById('reg-pass').value = '';
+        mostrarVista('view-login');
+
+      } catch (e) {
+        mostrarAlerta('register-msg', 'No se pudo enviar la solicitud');
+      }
+    }
+
+    function loginAdmin() {
+      const u = document.getElementById('admin-user').value.trim();
+      const p = document.getElementById('admin-pass').value.trim();
+
+      if (u === 'esteban388' && p === 'esteban388') {
+        mostrarVista('view-admin-panel');
+        cargarUsuariosAdmin();
+      } else {
+        mostrarAlerta('admin-login-error', 'Credenciales de administrador no válidas');
+      }
+    }
+
+    async function cargarUsuariosAdmin() {
+      const tabla = document.getElementById('admin-users-list');
+      tabla.innerHTML = '<tr><td colspan="4">Cargando talleres...</td></tr>';
+
+      try {
+        const resp = await fetch(`${FIREBASE_URL}.json`);
+        const data = await resp.json();
+        tabla.innerHTML = '';
+
+        if (!data) {
+          tabla.innerHTML = '<tr><td colspan="4">No hay talleres registrados</td></tr>';
+          return;
+        }
+
+        for (const key in data) {
+          const user = data[key];
+          const tr = document.createElement('tr');
+
+          const statusHtml = user.aprobado
+            ? '<span class="status-badge status-approved">Aprobado</span>'
+            : '<span class="status-badge status-pending">Pendiente</span>';
+
+          const accionAprobar = !user.aprobado
+            ? `<button class="action-btn action-btn-approve" onclick="aprobarUsuario('${key}')">Aprobar</button>`
+            : '';
 
           tr.innerHTML = `
-            <td><strong>${u.id}</strong></td>
-            <td>${u.taller}</td>
-            <td><code>${u.pass}</code></td>
-            <td>${badge}</td>
-            <td>${acciones}</td>
+            <td><strong>${user.id}</strong></td>
+            <td>${user.password}</td>
+            <td>${statusHtml}</td>
+            <td>
+              ${accionAprobar}
+              <button class="action-btn action-btn-del" onclick="eliminarUsuario('${key}')">Eliminar</button>
+            </td>
           `;
-          tbody.appendChild(tr);
-        });
-      } catch (e) {
-        tbody.innerHTML = "<tr><td colspan='5'>Error cargando la lista.</td></tr>";
-      }
-    }
-
-    async function aprobarUsuario(id) {
-      await fetch(`${FIREBASE_URL}/${id}.json`, {
-        method: "PATCH",
-        body: JSON.stringify({ estado: "aprobado" })
-      });
-      cargarUsuariosAdmin();
-    }
-
-    async function aprobarReset(id, nuevoPass) {
-      await fetch(`${FIREBASE_URL}/${id}.json`, {
-        method: "PATCH",
-        body: JSON.stringify({ pass: nuevoPass, estado: "aprobado", passSolicitado: null })
-      });
-      cargarUsuariosAdmin();
-    }
-
-    async function cambiarClaveAdmin(id) {
-      const nueva = prompt("Ingresa la nueva contraseña para el taller " + id + ":");
-      if (nueva && nueva.trim() !== "") {
-        await fetch(`${FIREBASE_URL}/${id}.json`, {
-          method: "PATCH",
-          body: JSON.stringify({ pass: nueva.trim() })
-        });
-        cargarUsuariosAdmin();
-      }
-    }
-
-    async function eliminarUsuario(id) {
-      if (confirm("¿Estás seguro de que deseas eliminar el acceso al taller " + id + "?")) {
-        await fetch(`${FIREBASE_URL}/${id}.json`, { method: "DELETE" });
-        cargarUsuariosAdmin();
-      }
-    }
-
-    // GENERADOR DEL CÓDIGO OTP
-    function leerCodigo() {
-      const token = totp.generate();
-      document.getElementById("codigo").innerText = token.slice(0, 3) + " " + token.slice(3);
-
-      const tiempoActual = Math.floor(Date.now() / 1000);
-      let restantes = 30 - (tiempoActual % 30);
-
-      clearInterval(temporizador);
-      document.getElementById("tiempo").innerText = "Expira en: " + restantes + "s";
-
-      temporizador = setInterval(() => {
-        restantes--;
-        if (restantes <= 0) {
-          clearInterval(temporizador);
-          document.getElementById("tiempo").innerText = "Código expirado. Vuelve a presionar.";
-        } else {
-          document.getElementById("tiempo").innerText = "Expira en: " + restantes + "s";
+          tabla.appendChild(tr);
         }
-      }, 1000);
+      } catch (e) {
+        tabla.innerHTML = '<tr><td colspan="4">Error al cargar registros</td></tr>';
+      }
     }
 
-    function copiarTexto(txt) {
-      navigator.clipboard.writeText(txt).then(() => {
-        alert("Copiado al portapapeles: " + txt);
+    async function aprobarUsuario(key) {
+      await fetch(`${FIREBASE_URL}/${key}.json`, {
+        method: 'PATCH',
+        body: JSON.stringify({ aprobado: true })
       });
+      cargarUsuariosAdmin();
+      mostrarToast('Taller autorizado');
+    }
+
+    async function eliminarUsuario(key) {
+      if (confirm('¿Deseas eliminar este taller del sistema?')) {
+        await fetch(`${FIREBASE_URL}/${key}.json`, {
+          method: 'DELETE'
+        });
+        cargarUsuariosAdmin();
+        mostrarToast('Taller eliminado');
+      }
     }
 
     function cerrarSesion() {
-      clearInterval(temporizador);
-      cambiarVista('vistaLogin');
-      document.getElementById("loginId").value = "";
-      document.getElementById("loginPass").value = "";
-      document.getElementById("adminUser").value = "";
-      document.getElementById("adminPass").value = "";
-      document.getElementById("msgLogin").innerText = "";
+      if (otpInterval) clearInterval(otpInterval);
+      document.getElementById('login-id').value = '';
+      document.getElementById('login-pass').value = '';
+      mostrarVista('view-login');
     }
   </script>
 </body>
