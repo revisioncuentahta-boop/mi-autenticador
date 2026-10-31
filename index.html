@@ -1,940 +1,721 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Portal Posventa - Automotor</title>
-
-  <!-- Fuentes e Iconos -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <!-- Librería TOTP -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/otpauth/9.1.4/otpauth.umd.min.js"></script>
-
-  <style>
-    :root {
-      --bg-dark: #051329;
-      --bg-gradient: radial-gradient(circle at 50% 0%, #0d274d 0%, #051329 100%);
-      --card-bg: rgba(255, 255, 255, 0.05);
-      --card-border: rgba(255, 255, 255, 0.12);
-      --primary: #0072d8;
-      --primary-hover: #005bb5;
-      --accent: #00e5ff;
-      --danger: #ff4d4d;
-      --success: #00e676;
-      --warning: #ffb300;
-      --text: #ffffff;
-      --text-muted: #8fa0bc;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background: var(--bg-gradient);
-      background-color: var(--bg-dark);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 340px;
-      height: 340px;
-      background-image: url('logo-posventa.png');
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: contain;
-      opacity: 0.08;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 440px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .card {
-      background: var(--card-bg);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--card-border);
-      border-radius: 20px;
-      padding: 24px;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
-      margin-bottom: 20px;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-
-    .brand-img {
-      width: 86px;
-      height: 86px;
-      margin: 0 auto 14px;
-      display: block;
-      object-fit: contain;
-      border-radius: 18px;
-    }
-
-    .header h1 {
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .header p {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-
-    .input-box {
-      position: relative;
-    }
-
-    .input-box i {
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-muted);
-      font-size: 14px;
-    }
-
-    .input-box input {
-      width: 100%;
-      height: 48px;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      padding: 0 16px 0 42px;
-      color: #ffffff;
-      font-size: 14px;
-      outline: none;
-    }
-
-    .btn {
-      width: 100%;
-      height: 48px;
-      border: none;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .btn:active {
-      transform: scale(0.98);
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #ffffff;
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 1px solid var(--card-border);
-      color: var(--text);
-    }
-
-    .btn-admin {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--text-muted);
-      border: 1px dashed var(--card-border);
-    }
-
-    .auth-box {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 14px;
-    }
-
-    .data-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    }
-
-    .data-row:last-child {
-      border-bottom: none;
-    }
-
-    .data-label {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .data-val {
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .copy-icon {
-      cursor: pointer;
-      color: var(--accent);
-      font-size: 14px;
-    }
-
-    .otp-display {
-      text-align: center;
-      padding: 16px 0;
-    }
-
-    .otp-code {
-      font-size: 38px;
-      font-weight: 800;
-      letter-spacing: 6px;
-      color: var(--accent);
-      font-variant-numeric: tabular-nums;
-      cursor: pointer;
-    }
-
-    .progress-bar-container {
-      width: 100%;
-      height: 4px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 100%;
-      background: var(--accent);
-      transition: width 1s linear;
-    }
-
-    .alert {
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-size: 12px;
-      margin-bottom: 14px;
-      display: none;
-    }
-
-    .alert-danger {
-      background: rgba(255, 77, 77, 0.15);
-      color: var(--danger);
-      border: 1px solid var(--danger);
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      background: #00e676;
-      color: #051329;
-      padding: 10px 20px;
-      border-radius: 30px;
-      font-size: 13px;
-      font-weight: 700;
-      display: none;
-      z-index: 999;
-    }
-
-    .admin-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      font-size: 12px;
-    }
-
-    .admin-table th, .admin-table td {
-      padding: 8px 4px;
-      text-align: left;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      vertical-align: middle;
-    }
-
-    .admin-table th {
-      color: var(--text-muted);
-    }
-
-    .status-badge {
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 700;
-    }
-
-    .status-approved {
-      background: rgba(0, 230, 118, 0.15);
-      color: var(--success);
-    }
-
-    .status-pending {
-      background: rgba(255, 193, 7, 0.15);
-      color: #ffc107;
-    }
-
-    .action-group {
-      display: flex;
-      gap: 4px;
-    }
-
-    .action-btn {
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .action-btn-approve {
-      background: var(--success);
-      color: #051329;
-    }
-
-    .action-btn-pass {
-      background: var(--warning);
-      color: #051329;
-    }
-
-    .action-btn-del {
-      background: var(--danger);
-      color: #ffffff;
-    }
-
-    /* MODAL FLOTANTE NATIVO PARA EDITAR / CONFIRMAR */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: 16px;
-    }
-
-    .modal-box {
-      background: #0d274d;
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 20px;
-      width: 100%;
-      max-width: 360px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-      text-align: center;
-    }
-
-    .modal-box h3 {
-      font-size: 16px;
-      margin-bottom: 12px;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 14px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FleetManager PRO - Planes de Mantenimiento</title>
+  <!-- React & ReactDOM CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- Babel Standalone -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SheetJS para leer XLSX nativo -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased">
+  <div id="root"></div>
 
-  <div class="container">
-    
-    <!-- VISTA 1: LOGIN TALLERES -->
-    <div id="view-login" class="card">
-      <div class="header">
-        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Logo" class="brand-img">
-        <h1>POSVENTA AUTOMOTOR</h1>
-        <p>Acceso a Plataforma Técnica Hyundai</p>
-      </div>
+  <script type="text/babel">
+    const { useState, useMemo, useEffect } = React;
 
-      <div id="login-error" class="alert alert-danger"></div>
+    const INITIAL_CATEGORIES = [
+      { id: 'ligeros', name: 'Vehículos Ligeros', icon: 'car' },
+      { id: 'camiones', name: 'Camiones & Comercial', icon: 'truck' },
+      { id: 'maquinarias', name: 'Maquinarias & Pesados', icon: 'wrench' },
+    ];
 
-      <div class="form-group">
-        <label>ID o Nombre de Taller</label>
-        <div class="input-box">
-          <i class="fa-solid fa-warehouse"></i>
-          <input type="text" id="login-id" placeholder="Ej: Taller Central">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Contraseña</label>
-        <div class="input-box">
-          <i class="fa-solid fa-lock"></i>
-          <input type="password" id="login-pass" placeholder="••••••••">
-        </div>
-      </div>
-
-      <button type="button" class="btn btn-primary" onclick="loginTaller()">
-        <i class="fa-solid fa-right-to-bracket"></i> Ingresar al Portal
-      </button>
-
-      <button type="button" class="btn btn-outline" onclick="mostrarVista('view-register')">
-        <i class="fa-solid fa-user-plus"></i> Solicitar Registro
-      </button>
-
-      <button type="button" class="btn btn-admin" onclick="mostrarVista('view-admin-login')">
-        <i class="fa-solid fa-shield-halved"></i> Panel de Administración
-      </button>
-    </div>
-
-    <!-- VISTA 2: REGISTRO -->
-    <div id="view-register" class="card" style="display: none;">
-      <div class="header">
-        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Logo" class="brand-img">
-        <h1>SOLICITUD DE ACCESO</h1>
-        <p>Registro para Talleres Autorizados</p>
-      </div>
-
-      <div id="register-msg" class="alert alert-danger"></div>
-
-      <div class="form-group">
-        <label>Nombre del Taller / Responsable</label>
-        <div class="input-box">
-          <i class="fa-solid fa-wrench"></i>
-          <input type="text" id="reg-id" placeholder="Nombre de taller">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Contraseña requerida</label>
-        <div class="input-box">
-          <i class="fa-solid fa-key"></i>
-          <input type="password" id="reg-pass" placeholder="Definir contraseña">
-        </div>
-      </div>
-
-      <button type="button" class="btn btn-primary" onclick="registrarTaller()">
-        <i class="fa-solid fa-paper-plane"></i> Enviar Solicitud
-      </button>
-
-      <button type="button" class="btn btn-outline" onclick="mostrarVista('view-login')">
-        <i class="fa-solid fa-arrow-left"></i> Volver al Login
-      </button>
-    </div>
-
-    <!-- VISTA 3: PORTAL Y OTP -->
-    <div id="view-portal" class="card" style="display: none;">
-      <div class="header">
-        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Logo" class="brand-img">
-        <h1 id="taller-nombre-display">TALLER AUTORIZADO</h1>
-        <p>Acceso Oficial Posventa Hyundai</p>
-      </div>
-
-      <div class="auth-box">
-        <div class="data-row">
-          <span class="data-label">Usuario Hyundai:</span>
-          <span class="data-val">
-            <span>ccc@automotor.com.py</span>
-            <i class="fa-regular fa-copy copy-icon" onclick="copiarTexto('ccc@automotor.com.py')"></i>
-          </span>
-        </div>
-        <div class="data-row">
-          <span class="data-label">Contraseña Hyundai:</span>
-          <span class="data-val">
-            <span>Ccc*2026</span>
-            <i class="fa-regular fa-copy copy-icon" onclick="copiarTexto('Ccc*2026')"></i>
-          </span>
-        </div>
-      </div>
-
-      <div class="auth-box otp-display">
-        <span class="data-label">CÓDIGO DE VERIFICACIÓN (OTP)</span>
-        <div class="otp-code" id="otp-code" onclick="copiarOTP()">------</div>
-        <div class="progress-bar-container">
-          <div class="progress-bar" id="otp-progress"></div>
-        </div>
-        <p style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">
-          Toca el código para copiar al portapapeles
-        </p>
-      </div>
-
-      <button type="button" class="btn btn-outline" onclick="cerrarSesion()">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i> Salir
-      </button>
-    </div>
-
-    <!-- VISTA 4: LOGIN ADMIN -->
-    <div id="view-admin-login" class="card" style="display: none;">
-      <div class="header">
-        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Logo" class="brand-img">
-        <h1>ADMINISTRACIÓN</h1>
-        <p>Gestión de Talleres Automotor</p>
-      </div>
-
-      <div id="admin-login-error" class="alert alert-danger"></div>
-
-      <div class="form-group">
-        <label>Usuario</label>
-        <div class="input-box">
-          <i class="fa-solid fa-user-shield"></i>
-          <input type="text" id="admin-user" placeholder="Usuario administrador">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label>Contraseña</label>
-        <div class="input-box">
-          <i class="fa-solid fa-key"></i>
-          <input type="password" id="admin-pass" placeholder="••••••••">
-        </div>
-      </div>
-
-      <button type="button" class="btn btn-primary" onclick="loginAdmin()">
-        <i class="fa-solid fa-unlock"></i> Ingresar al Panel
-      </button>
-
-      <button type="button" class="btn btn-outline" onclick="mostrarVista('view-login')">
-        <i class="fa-solid fa-arrow-left"></i> Volver
-      </button>
-    </div>
-
-    <!-- VISTA 5: PANEL ADMIN -->
-    <div id="view-admin-panel" class="card" style="display: none; max-width: 650px;">
-      <div class="header">
-        <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Logo" class="brand-img">
-        <h1>PANEL DE CONTROL</h1>
-        <p>Gestión y contraseñas de talleres</p>
-      </div>
-
-      <div style="overflow-x: auto;">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Taller</th>
-              <th>Contraseña</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="admin-users-list">
-          </tbody>
-        </table>
-      </div>
-
-      <button type="button" class="btn btn-outline" style="margin-top: 20px;" onclick="mostrarVista('view-login')">
-        <i class="fa-solid fa-arrow-left"></i> Salir del Panel
-      </button>
-    </div>
-
-  </div>
-
-  <!-- MODAL PARA CAMBIAR CONTRASEÑA -->
-  <div id="modal-pass" class="modal-overlay">
-    <div class="modal-box">
-      <h3>Modificar Contraseña</h3>
-      <p id="modal-taller-nombre" style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;"></p>
-      <input type="hidden" id="modal-pass-key">
-      
-      <div class="input-box" style="margin-bottom: 14px;">
-        <i class="fa-solid fa-key"></i>
-        <input type="text" id="modal-new-pass" placeholder="Nueva contraseña">
-      </div>
-
-      <div class="modal-actions">
-        <button type="button" class="btn btn-primary" style="margin-top: 0;" onclick="guardarPasswordModal()">Guardar</button>
-        <button type="button" class="btn btn-outline" style="margin-top: 0;" onclick="cerrarModales()">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL PARA CONFIRMAR ELIMINACIÓN -->
-  <div id="modal-del" class="modal-overlay">
-    <div class="modal-box">
-      <h3>¿Eliminar Taller?</h3>
-      <p id="modal-del-taller" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;"></p>
-      <input type="hidden" id="modal-del-key">
-
-      <div class="modal-actions">
-        <button type="button" class="btn btn-primary" style="background: var(--danger); margin-top: 0;" onclick="confirmarEliminarModal()">Eliminar</button>
-        <button type="button" class="btn btn-outline" style="margin-top: 0;" onclick="cerrarModales()">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="toast" class="toast">Texto copiado</div>
-
-  <script>
-    var TOTP_SECRET = 'QO6YTQ7KZU72VX7N';
-    var FIREBASE_URL = 'https://hyundai-auth-default-rtdb.firebaseio.com/usuarios';
-
-    var totp = null;
-    try {
-      totp = new OTPAuth.TOTP({
-        issuer: 'Hyundai',
-        label: 'Automotor',
-        algorithm: 'SHA1',
-        digits: 6,
-        period: 30,
-        secret: OTPAuth.Secret.fromBase32(TOTP_SECRET)
+    function App() {
+      const [categories] = useState(INITIAL_CATEGORIES);
+      const [models, setModels] = useState(() => {
+        const saved = localStorage.getItem('fleet_models');
+        return saved ? JSON.parse(saved) : [];
       });
-    } catch (e) {
-      console.log(e);
-    }
 
-    var otpInterval = null;
+      const [uploadHistory, setUploadHistory] = useState(() => {
+        const saved = localStorage.getItem('fleet_upload_history');
+        return saved ? JSON.parse(saved) : [];
+      });
 
-    function getCampo(obj, opciones) {
-      if (!obj) return '';
-      for (var i = 0; i < opciones.length; i++) {
-        var k = opciones[i];
-        if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== '') {
-          return String(obj[k]).trim();
+      const [isAdmin, setIsAdmin] = useState(false);
+      const [showLoginModal, setShowLoginModal] = useState(false);
+      const [adminId, setAdminId] = useState('');
+      const [adminPassword, setAdminPassword] = useState('');
+      const [loginError, setLoginError] = useState('');
+
+      const [activeCategory, setActiveCategory] = useState('all');
+      const [selectedBrand, setSelectedBrand] = useState('all');
+      const [searchTerm, setSearchTerm] = useState('');
+
+      const [selectedModelId, setSelectedModelId] = useState(null);
+      const [viewMode, setViewMode] = useState('interval');
+      const [selectedInterval, setSelectedInterval] = useState(null);
+
+      const [copiedCode, setCopiedCode] = useState('');
+      const [showImportModal, setShowImportModal] = useState(false);
+
+      useEffect(() => {
+        localStorage.setItem('fleet_models', JSON.stringify(models));
+      }, [models]);
+
+      useEffect(() => {
+        localStorage.setItem('fleet_upload_history', JSON.stringify(uploadHistory));
+      }, [uploadHistory]);
+
+      const selectedModel = useMemo(() => {
+        return models.find(m => m.id === selectedModelId) || null;
+      }, [models, selectedModelId]);
+
+      useEffect(() => {
+        if (selectedModel && selectedModel.intervals.length > 0) {
+          setSelectedInterval(selectedModel.intervals[0]);
         }
-      }
-      return '';
-    }
+      }, [selectedModelId, selectedModel]);
 
-    function mostrarVista(vistaId) {
-      var vistas = ['view-login', 'view-register', 'view-portal', 'view-admin-login', 'view-admin-panel'];
-      for (var i = 0; i < vistas.length; i++) {
-        var el = document.getElementById(vistas[i]);
-        if (el) el.style.display = (vistas[i] === vistaId) ? 'block' : 'none';
-      }
-      var alertas = document.querySelectorAll('.alert');
-      for (var j = 0; j < alertas.length; j++) {
-        alertas[j].style.display = 'none';
-      }
-    }
+      useEffect(() => {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      });
 
-    function mostrarAlerta(id, texto) {
-      var el = document.getElementById(id);
-      if (el) {
-        el.textContent = texto;
-        el.style.display = 'block';
-      }
-    }
+      const availableBrands = useMemo(() => {
+        const brandSet = new Set(models.map(m => m.brand));
+        return Array.from(brandSet).sort();
+      }, [models]);
 
-    function mostrarToast(texto) {
-      var toast = document.getElementById('toast');
-      if (toast) {
-        toast.textContent = texto;
-        toast.style.display = 'block';
-        setTimeout(function() { toast.style.display = 'none'; }, 2000);
-      }
-    }
+      const filteredModels = useMemo(() => {
+        return models.filter(model => {
+          const matchCat = activeCategory === 'all' || model.categoryId === activeCategory;
+          const matchBrand = selectedBrand === 'all' || model.brand === selectedBrand;
+          const search = searchTerm.toLowerCase().trim();
+          const matchSearch = !search || 
+            model.name.toLowerCase().includes(search) || 
+            model.brand.toLowerCase().includes(search) ||
+            Object.values(model.codes).some(code => code && code.toLowerCase().includes(search));
 
-    function copiarTexto(texto) {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(texto).then(function() {
-          mostrarToast('Copiado al portapapeles');
+          return matchCat && matchBrand && matchSearch;
         });
-      } else {
-        var dummy = document.createElement("input");
-        document.body.appendChild(dummy);
-        dummy.value = texto;
-        dummy.select();
-        document.execCommand("copy");
-        document.body.removeChild(dummy);
-        mostrarToast('Copiado al portapapeles');
-      }
-    }
+      }, [models, activeCategory, selectedBrand, searchTerm]);
 
-    function copiarOTP() {
-      var el = document.getElementById('otp-code');
-      if (el && el.textContent && el.textContent !== '------') {
-        copiarTexto(el.textContent);
-      }
-    }
+      const handleAdminAuthToggle = () => {
+        if (isAdmin) {
+          setIsAdmin(false);
+          setCopiedCode('Sesión de administración cerrada');
+          setTimeout(() => setCopiedCode(''), 2500);
+        } else {
+          setAdminId('');
+          setAdminPassword('');
+          setLoginError('');
+          setShowLoginModal(true);
+        }
+      };
 
-    function iniciarGeneradorOTP() {
-      if (otpInterval) clearInterval(otpInterval);
-      if (!totp) return;
+      const handleLoginSubmit = (e) => {
+        e.preventDefault();
+        if (adminId.trim() === 'admin' && adminPassword === '1234') {
+          setIsAdmin(true);
+          setShowLoginModal(false);
+          setLoginError('');
+          setCopiedCode('¡Sesión de Administrador iniciada!');
+          setTimeout(() => setCopiedCode(''), 2500);
+        } else {
+          setLoginError('ID de usuario o contraseña incorrectos.');
+        }
+      };
 
-      function actualizar() {
-        var codigo = totp.generate();
-        var codeEl = document.getElementById('otp-code');
-        if (codeEl) codeEl.textContent = codigo;
+      const handleCopyCode = (code, label) => {
+        if (!code || code === 'N/A' || code === 'N/D') return;
+        const textArea = document.createElement("textarea");
+        textArea.value = code;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try { document.execCommand('copy'); } catch (err) {}
+        document.body.removeChild(textArea);
+        setCopiedCode(`¡Código ${label} (${code}) copiado!`);
+        setTimeout(() => setCopiedCode(''), 2500);
+      };
 
-        var epoch = Math.floor(Date.now() / 1000);
-        var restantes = 30 - (epoch % 30);
-        var porcentaje = (restantes / 30) * 100;
-        var barEl = document.getElementById('otp-progress');
-        if (barEl) barEl.style.width = porcentaje + '%';
-      }
+      const handleDeleteModel = (modelId, e) => {
+        if (e) e.stopPropagation();
+        setModels(prev => prev.filter(m => m.id !== modelId));
+        if (selectedModelId === modelId) {
+          setSelectedModelId(null);
+        }
+        setCopiedCode('Modelo eliminado correctamente');
+        setTimeout(() => setCopiedCode(''), 2500);
+      };
 
-      actualizar();
-      otpInterval = setInterval(actualizar, 1000);
-    }
+      const handleClearAllModels = () => {
+        if (window.confirm('¿Estás seguro de que deseas eliminar TODOS los modelos cargados? Esta acción dejará el catálogo limpio.')) {
+          setModels([]);
+          setUploadHistory([]);
+          setSelectedModelId(null);
+          localStorage.removeItem('fleet_models');
+          localStorage.removeItem('fleet_upload_history');
+          setCopiedCode('Base de datos limpiada por completo');
+          setTimeout(() => setCopiedCode(''), 3000);
+        }
+      };
 
-    function loginTaller() {
-      var idInput = document.getElementById('login-id').value.trim();
-      var passInput = document.getElementById('login-pass').value.trim();
+      const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-      if (!idInput || !passInput) {
-        mostrarAlerta('login-error', 'Por favor ingresa tu taller y contraseña');
-        return;
-      }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            
+            let sheetName = workbook.SheetNames.find(name => name.toLowerCase().includes('plan')) || workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-      fetch(FIREBASE_URL + '.json')
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          var encontrado = null;
-          var passReal = '';
-          var nombreReal = '';
-
-          if (data) {
-            for (var key in data) {
-              var u = data[key];
-              var id = getCampo(u, ['id', 'taller', 'nombre', 'usuario']);
-              if (id.toLowerCase() === idInput.toLowerCase()) {
-                encontrado = u;
-                nombreReal = id;
-                passReal = getCampo(u, ['password', 'pass', 'clave', 'contraseña', 'pin']);
-                break;
-              }
+            if (jsonRows.length < 2) {
+              alert('La hoja de cálculo está vacía o no tiene el formato correcto.');
+              return;
             }
-          }
 
-          if (!encontrado) {
-            mostrarAlerta('login-error', 'Taller no encontrado. Solicita registro.');
-            return;
-          }
-
-          if (passReal !== passInput) {
-            mostrarAlerta('login-error', 'Contraseña incorrecta');
-            return;
-          }
-
-          if (!encontrado.aprobado) {
-            mostrarAlerta('login-error', 'Tu cuenta está pendiente de aprobación por Automotor');
-            return;
-          }
-
-          document.getElementById('taller-nombre-display').textContent = nombreReal.toUpperCase();
-          mostrarVista('view-portal');
-          iniciarGeneradorOTP();
-        })
-        .catch(function(err) {
-          mostrarAlerta('login-error', 'Error de conexión con Firebase');
-        });
-    }
-
-    function registrarTaller() {
-      var id = document.getElementById('reg-id').value.trim();
-      var pass = document.getElementById('reg-pass').value.trim();
-
-      if (!id || !pass) {
-        mostrarAlerta('register-msg', 'Completa todos los campos');
-        return;
-      }
-
-      fetch(FIREBASE_URL + '.json')
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (data) {
-            for (var key in data) {
-              var u = data[key];
-              var nombre = getCampo(u, ['id', 'taller', 'nombre', 'usuario']);
-              if (nombre.toLowerCase() === id.toLowerCase()) {
-                mostrarAlerta('register-msg', 'Este taller ya se encuentra registrado');
-                return;
+            const headerRow = jsonRows[0].map(h => String(h || '').trim().toLowerCase());
+            
+            // Detección precisa de columnas
+            const findCol = (exactNames, fallbackIdx) => {
+              for (const name of exactNames) {
+                const idx = headerRow.findIndex(h => h === name || h.includes(name));
+                if (idx >= 0) return idx;
               }
+              return fallbackIdx;
+            };
+
+            const colIndex = {
+              brand: findCol(['nombre marca', 'marca'], 1),
+              model: findCol(['nombre modelo', 'modelo'], 4),
+              km: findCol(['kilometraje', 'km'], 5),
+              hours: findCol(['horas', 'hs'], 6),
+              artCode: findCol(['codigo articulo', 'código articulo', 'articulo'], 7),
+              artName: findCol(['nombre articulo', 'descripc'], 8),
+              qty: findCol(['cantidad'], 9),
+              price: findCol(['precio unitario', 'precio'], 10)
+            };
+
+            const modelsMap = {};
+
+            for (let i = 1; i < jsonRows.length; i++) {
+              const row = jsonRows[i];
+              if (!row || row.length === 0) continue;
+
+              const brand = String(row[colIndex.brand] || 'GENERAL').trim();
+              const modelName = String(row[colIndex.model] || '').trim();
+              if (!modelName || modelName.toUpperCase() === 'NOMBRE MODELO') continue;
+
+              const km = parseInt(row[colIndex.km]) || 0;
+              const hours = parseInt(row[colIndex.hours]) || 0;
+              const intervalVal = km > 0 ? km : hours;
+              const intervalUnit = km > 0 ? 'km' : 'hs';
+
+              const artCode = String(row[colIndex.artCode] || 'S/C').trim();
+              const artName = String(row[colIndex.artName] || 'ARTICULO').trim();
+              const qty = parseFloat(row[colIndex.qty]) || 1;
+              const unitPrice = parseFloat(row[colIndex.price]) || 0;
+
+              const modelKey = `${brand}_${modelName}`.toUpperCase();
+
+              if (!modelsMap[modelKey]) {
+                let cat = 'ligeros';
+                const upperName = modelName.toUpperCase();
+                const upperBrand = brand.toUpperCase();
+                
+                if (upperName.includes('CAMION') || upperName.includes('TRUCK') || upperBrand.includes('SHACMAN') || upperBrand.includes('ISUZU') || upperBrand.includes('FARIZON')) {
+                  cat = 'camiones';
+                } else if (upperName.includes('MAQUINARIA') || upperName.includes('EXCAVADORA') || upperName.includes('TRACTOR') || upperBrand.includes('AGRALE') || upperBrand.includes('LONKING')) {
+                  cat = 'maquinarias';
+                }
+
+                modelsMap[modelKey] = {
+                  id: 'm_' + Math.random().toString(36).substr(2, 9),
+                  categoryId: cat,
+                  brand: brand,
+                  name: modelName,
+                  codes: {
+                    aceiteMotor: 'N/D',
+                    filtroAceite: 'N/D',
+                    filtroAire: 'N/D',
+                    filtroCombustible: 'N/D',
+                    aceiteCaja: 'N/D',
+                    manoObraRef: 'MO001'
+                  },
+                  intervalsSet: new Set(),
+                  unit: intervalUnit,
+                  planItemsMap: {}
+                };
+              }
+
+              const modelObj = modelsMap[modelKey];
+              if (intervalVal > 0) {
+                modelObj.intervalsSet.add(intervalVal);
+              }
+
+              const lowerArt = artName.toLowerCase();
+              if (lowerArt.includes('aceite motor') || lowerArt.includes('aceite de motor')) modelObj.codes.aceiteMotor = artCode;
+              else if (lowerArt.includes('filtro de aceite') || lowerArt.includes('filtro aceite')) modelObj.codes.filtroAceite = artCode;
+              else if (lowerArt.includes('filtro de aire') || lowerArt.includes('filtro aire')) modelObj.codes.filtroAire = artCode;
+              else if (lowerArt.includes('filtro de combustible') || lowerArt.includes('filtro combustible')) modelObj.codes.filtroCombustible = artCode;
+              else if (lowerArt.includes('aceite caja') || lowerArt.includes('aceite de caja')) modelObj.codes.aceiteCaja = artCode;
+              else if (lowerArt.includes('mano de obra')) modelObj.codes.manoObraRef = artCode;
+
+              if (!modelObj.planItemsMap[artCode]) {
+                let itemCategory = 'Repuestos';
+                if (lowerArt.includes('aceite') || lowerArt.includes('lubricante')) itemCategory = 'Lubricantes';
+                else if (lowerArt.includes('filtro')) itemCategory = 'Filtros';
+                else if (lowerArt.includes('mano de obra') || lowerArt.includes('servicio')) itemCategory = 'Servicios';
+
+                modelObj.planItemsMap[artCode] = {
+                  code: artCode,
+                  name: artName,
+                  unitPrice: unitPrice,
+                  category: itemCategory,
+                  applyAt: {}
+                };
+              }
+
+              modelObj.planItemsMap[artCode].applyAt[intervalVal] = qty;
             }
-          }
 
-          fetch(FIREBASE_URL + '.json', {
-            method: 'POST',
-            body: JSON.stringify({
-              id: id,
-              password: pass,
-              aprobado: false,
-              fecha: new Date().toISOString()
-            })
-          }).then(function() {
-            mostrarToast('Solicitud enviada');
-            document.getElementById('reg-id').value = '';
-            document.getElementById('reg-pass').value = '';
-            mostrarVista('view-login');
-          });
-        })
-        .catch(function() {
-          mostrarAlerta('register-msg', 'Error al enviar solicitud');
+            const importedModelsList = Object.values(modelsMap).map(m => ({
+              ...m,
+              intervals: Array.from(m.intervalsSet).sort((a, b) => a - b),
+              plan: Object.values(m.planItemsMap)
+            }));
+
+            if (importedModelsList.length === 0) {
+              alert('No se pudieron leer registros válidos. Verifica la planilla.');
+              return;
+            }
+
+            setModels(importedModelsList);
+
+            const newHistoryItem = {
+              id: 'h_' + Date.now(),
+              fileName: file.name,
+              date: new Date().toLocaleString('es-PY'),
+              modelsCount: importedModelsList.length
+            };
+            setUploadHistory([newHistoryItem]);
+
+            setShowImportModal(false);
+            setCopiedCode(`¡Se cargaron ${importedModelsList.length} modelos exitosamente desde ${file.name}!`);
+            setTimeout(() => setCopiedCode(''), 3500);
+          } catch (err) {
+            console.error(err);
+            alert('Error al leer el archivo Excel.');
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      };
+
+      const getIntervalSummary = (model, interval) => {
+        if (!model || !interval) return { items: [], total: 0 };
+        const items = model.plan.filter(item => item.applyAt && item.applyAt[interval] > 0).map(item => {
+          const qty = item.applyAt[interval];
+          const subtotal = qty * item.unitPrice;
+          return { ...item, qty, subtotal };
         });
+        const total = items.reduce((acc, curr) => acc + curr.subtotal, 0);
+        return { items, total };
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+          {/* HEADER */}
+          <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur border-b border-slate-800 px-4 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setSelectedModelId(null)}>
+              <div className="bg-gradient-to-tr from-blue-600 to-indigo-500 p-2.5 rounded-xl shadow-lg">
+                <i data-lucide="wrench" className="w-6 h-6 text-white"></i>
+              </div>
+              <div>
+                <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+                  FleetManager <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">PRO</span>
+                </h1>
+                <p className="text-xs text-slate-400">Planes de Mantenimiento Preventivo & Códigos</p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handleAdminAuthToggle}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                  isAdmin 
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' 
+                    : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'
+                }`}
+              >
+                <i data-lucide={isAdmin ? "unlock" : "lock"} className="w-4 h-4"></i>
+                <span>{isAdmin ? 'Zona Admin Activa' : 'Ingresar como Admin'}</span>
+              </button>
+
+              {isAdmin && (
+                <>
+                  <button
+                    onClick={() => setShowImportModal(true)}
+                    className="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-all shadow-md"
+                  >
+                    <i data-lucide="upload" className="w-4 h-4"></i>
+                    <span>Cargar Excel</span>
+                  </button>
+
+                  <button
+                    onClick={handleClearAllModels}
+                    className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white border border-red-500/30 text-xs font-semibold transition-all"
+                    title="Borrar toda la base de datos"
+                  >
+                    <i data-lucide="trash-2" className="w-4 h-4"></i>
+                    <span>Borrar Todo</span>
+                  </button>
+                </>
+              )}
+            </div>
+          </header>
+
+          {/* NOTIFICACIÓN */}
+          {copiedCode && (
+            <div className="fixed bottom-4 right-4 z-50 bg-emerald-500 text-slate-950 font-bold px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-2 border border-emerald-300">
+              <i data-lucide="check" className="w-5 h-5"></i>
+              <span className="text-sm">{copiedCode}</span>
+            </div>
+          )}
+
+          {/* CONTENIDO PRINCIPAL */}
+          <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+            {!selectedModel ? (
+              <div className="space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800 shadow-xl">
+                  <div className="relative flex-1">
+                    <i data-lucide="search" className="w-5 h-5 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input
+                      type="text"
+                      placeholder="Buscar modelo, marca o código..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full bg-slate-900 text-slate-100 text-sm pl-11 pr-4 py-2.5 rounded-xl border border-slate-800 focus:outline-none focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      onClick={() => { setActiveCategory('all'); setSelectedBrand('all'); }}
+                      className={`px-3.5 py-2 rounded-xl text-xs font-bold border ${activeCategory === 'all' ? 'bg-blue-600 text-white border-blue-400' : 'bg-slate-900 text-slate-400 border-slate-800'}`}
+                    >
+                      Todas ({models.length})
+                    </button>
+                    {categories.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => { setActiveCategory(cat.id); setSelectedBrand('all'); }}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 border ${activeCategory === cat.id ? 'bg-blue-600 text-white border-blue-400' : 'bg-slate-900 text-slate-400 border-slate-800'}`}
+                      >
+                        <i data-lucide={cat.icon} className="w-4 h-4"></i>
+                        <span>{cat.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* MARCAS */}
+                {availableBrands.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 w-full py-1">
+                    <span className="text-xs font-semibold text-slate-400 flex items-center gap-1 mr-1">
+                      <i data-lucide="filter" className="w-3.5 h-3.5"></i> Marca:
+                    </span>
+                    <button
+                      onClick={() => setSelectedBrand('all')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${selectedBrand === 'all' ? 'bg-slate-700 text-white' : 'bg-slate-900/60 text-slate-400'}`}
+                    >
+                      Todas
+                    </button>
+                    {availableBrands.map(brand => (
+                      <button
+                        key={brand}
+                        onClick={() => setSelectedBrand(brand)}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold border ${selectedBrand === brand ? 'bg-blue-600 text-white border-blue-400' : 'bg-slate-900/60 text-slate-400 border-slate-800'}`}
+                      >
+                        {brand}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* LISTA DE MODELOS */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredModels.map((model) => (
+                    <div
+                      key={model.id}
+                      onClick={() => setSelectedModelId(model.id)}
+                      className="bg-slate-950/70 border border-slate-800 hover:border-blue-500/50 rounded-2xl p-5 hover:shadow-2xl transition-all cursor-pointer flex flex-col justify-between group"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <span className="text-xs font-bold text-blue-400 uppercase">{model.brand}</span>
+                            <h3 className="text-lg font-bold text-white group-hover:text-blue-300">{model.name}</h3>
+                          </div>
+                          <div className="flex items-center space-x-1">
+                            {isAdmin && (
+                              <button
+                                onClick={(e) => handleDeleteModel(model.id, e)}
+                                className="p-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white mr-1"
+                                title="Eliminar Modelo"
+                              >
+                                <i data-lucide="trash-2" className="w-4 h-4"></i>
+                              </button>
+                            )}
+                            <span className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 group-hover:bg-blue-600 group-hover:text-white">
+                              <i data-lucide="chevron-right" className="w-5 h-5"></i>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-4 mt-4 border-t border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
+                        <span className="flex items-center gap-1">
+                          <i data-lucide="clock" className="w-3.5 h-3.5 text-blue-400"></i>
+                          {model.intervals.length} Intervalos ({model.unit})
+                        </span>
+                        <span className="text-blue-400 font-semibold">Ver Plan &rarr;</span>
+                      </div>
+                    </div>
+                  ))}
+
+                  {filteredModels.length === 0 && (
+                    <div className="col-span-full py-16 text-center bg-slate-950/40 rounded-2xl border border-slate-800 space-y-4">
+                      <i data-lucide="file-spreadsheet" className="w-12 h-12 text-slate-600 mx-auto"></i>
+                      <div>
+                        <h3 className="text-base font-bold text-slate-300">No hay modelos cargados</h3>
+                        <p className="text-xs text-slate-500 mt-1">Activa el Modo Administrador para cargar el archivo Excel de mantenimientos.</p>
+                      </div>
+                      {!isAdmin ? (
+                        <button
+                          onClick={handleAdminAuthToggle}
+                          className="px-4 py-2 bg-amber-500 text-slate-950 rounded-xl text-xs font-bold"
+                        >
+                          Ingresar como Admin para Cargar Excel
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setShowImportModal(true)}
+                          className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold"
+                        >
+                          Subir Archivo Excel (.xlsx) Ahora
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* VISTA DETALLADA DEL MODELO */
+              <div className="space-y-6">
+                <div className="bg-slate-950/80 p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+                  <button
+                    onClick={() => setSelectedModelId(null)}
+                    className="inline-flex items-center space-x-1 text-xs font-bold text-blue-400 hover:text-blue-300 mb-2"
+                  >
+                    <i data-lucide="arrow-left" className="w-4 h-4"></i>
+                    <span>Volver al Catálogo</span>
+                  </button>
+                  
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                      <span className="px-2.5 py-1 rounded-lg bg-blue-500/20 text-blue-400 text-xs font-bold uppercase">{selectedModel.brand}</span>
+                      <h2 className="text-2xl font-black text-white mt-1">{selectedModel.name}</h2>
+                    </div>
+
+                    <div className="flex items-center bg-slate-900 p-1 rounded-xl border border-slate-800">
+                      <button
+                        onClick={() => setViewMode('interval')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold ${viewMode === 'interval' ? 'bg-blue-600 text-white' : 'text-slate-400'}`}
+                      >
+                        Por Intervalo
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* CÓDIGOS DE REPUESTOS */}
+                  <div className="pt-4 border-t border-slate-800">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase mb-3 flex items-center gap-1.5">
+                      <i data-lucide="key-round" className="w-4 h-4 text-blue-400"></i> Códigos de Repuestos Clave (Clic para copiar)
+                    </h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                      {[
+                        { label: 'Aceite Motor', code: selectedModel.codes.aceiteMotor },
+                        { label: 'Filtro Aceite', code: selectedModel.codes.filtroAceite },
+                        { label: 'Filtro Aire', code: selectedModel.codes.filtroAire },
+                        { label: 'F. Combustible', code: selectedModel.codes.filtroCombustible },
+                        { label: 'Aceite Caja', code: selectedModel.codes.aceiteCaja },
+                        { label: 'Mano de Obra', code: selectedModel.codes.manoObraRef },
+                      ].map((item, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleCopyCode(item.code, item.label)}
+                          className="bg-slate-900 hover:bg-slate-800 p-2.5 rounded-xl border border-slate-800 text-left"
+                        >
+                          <span className="text-[10px] font-bold text-slate-400 uppercase">{item.label}</span>
+                          <div className="flex items-center justify-between mt-1">
+                            <span className="font-mono font-bold text-xs text-white truncate">{item.code || 'N/D'}</span>
+                            <i data-lucide="copy" className="w-3.5 h-3.5 text-slate-500"></i>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* TABLA POR INTERVALO */}
+                {viewMode === 'interval' && (
+                  <div className="space-y-5">
+                    <div className="bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+                      <span className="text-xs font-bold text-slate-400 uppercase block mb-3">Selecciona Intervalo ({selectedModel.unit.toUpperCase()}):</span>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedModel.intervals.map((intVal) => (
+                          <button
+                            key={intVal}
+                            onClick={() => setSelectedInterval(intVal)}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold border ${selectedInterval === intVal ? 'bg-blue-600 text-white border-blue-400' : 'bg-slate-900 text-slate-400 border-slate-800'}`}
+                          >
+                            {intVal.toLocaleString('es-PY')} {selectedModel.unit}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {selectedInterval && (() => {
+                      const summary = getIntervalSummary(selectedModel, selectedInterval);
+                      return (
+                        <div className="bg-slate-950/80 rounded-2xl border border-slate-800 overflow-hidden shadow-xl">
+                          <div className="bg-slate-900/80 p-4 border-b border-slate-800 flex flex-wrap items-center justify-between gap-4">
+                            <div>
+                              <h3 className="text-base font-bold text-white">Mantenimiento de {selectedInterval.toLocaleString('es-PY')} {selectedModel.unit}</h3>
+                            </div>
+                            <div className="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 text-right">
+                              <span className="text-[10px] font-bold text-slate-400 uppercase block">Costo Total</span>
+                              <span className="text-lg font-black text-emerald-400">Gs. {summary.total.toLocaleString('es-PY')}</span>
+                            </div>
+                          </div>
+
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs">
+                              <thead>
+                                <tr className="bg-slate-900/40 text-slate-400 border-b border-slate-800 font-bold uppercase">
+                                  <th className="p-3.5">Código</th>
+                                  <th className="p-3.5">Descripción</th>
+                                  <th className="p-3.5 text-center">Cantidad</th>
+                                  <th className="p-3.5 text-right">Precio Unit. (Gs.)</th>
+                                  <th className="p-3.5 text-right">Subtotal (Gs.)</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-800/60 font-medium">
+                                {summary.items.map((item, idx) => (
+                                  <tr key={idx} className="hover:bg-slate-900/30">
+                                    <td className="p-3.5 font-mono text-slate-300">{item.code}</td>
+                                    <td className="p-3.5 font-semibold text-white">{item.name}</td>
+                                    <td className="p-3.5 text-center font-bold text-blue-400">{item.qty}</td>
+                                    <td className="p-3.5 text-right text-slate-300">Gs. {item.unitPrice.toLocaleString('es-PY')}</td>
+                                    <td className="p-3.5 text-right font-bold text-emerald-400">Gs. {item.subtotal.toLocaleString('es-PY')}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
+              </div>
+            )}
+          </main>
+
+          {/* MODAL LOGIN ADMIN */}
+          {showLoginModal && (
+            <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl">
+                <h3 className="text-base font-bold text-white">Ingreso a Zona de Administración</h3>
+                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                  {loginError && <p className="text-red-400 text-xs font-semibold">{loginError}</p>}
+                  <input
+                    type="text"
+                    value={adminId}
+                    onChange={(e) => setAdminId(e.target.value)}
+                    placeholder="ID de Usuario (admin)"
+                    className="w-full bg-slate-950 text-white text-sm p-3 rounded-xl border border-slate-800"
+                    required
+                  />
+                  <input
+                    type="password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="Contraseña (1234)"
+                    className="w-full bg-slate-950 text-white text-sm p-3 rounded-xl border border-slate-800"
+                    required
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <button type="button" onClick={() => setShowLoginModal(false)} className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs">Cancelar</button>
+                    <button type="submit" className="px-4 py-2 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs">Ingresar</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* MODAL SUBIR EXCEL & HISTORIAL */}
+          {showImportModal && (
+            <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl">
+                <h3 className="text-base font-bold text-white">Cargar Excel (.xlsx) & Historial</h3>
+                
+                <div className="border border-dashed border-slate-700 bg-slate-950 p-6 rounded-xl text-center space-y-3">
+                  <i data-lucide="file-spreadsheet" className="w-8 h-8 text-emerald-400 mx-auto"></i>
+                  <label className="inline-block px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold cursor-pointer">
+                    <span>Seleccionar Archivo Excel (.xlsx)</span>
+                    <input type="file" accept=".xlsx, .xls, .csv" onChange={handleFileUpload} className="hidden" />
+                  </label>
+                  <p className="text-[11px] text-slate-500">Soporta archivos Excel nativos (.xlsx)</p>
+                </div>
+
+                {/* HISTORIAL DE ARCHIVOS CARGADOS */}
+                {uploadHistory.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase">Historial de Subidas:</h4>
+                    <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1">
+                      {uploadHistory.map(item => (
+                        <div key={item.id} className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-center justify-between text-xs">
+                          <div>
+                            <span className="font-semibold text-white block truncate">{item.fileName}</span>
+                            <span className="text-[10px] text-slate-500">{item.date} • {item.modelsCount} modelos</span>
+                          </div>
+                          <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px] font-bold">Cargado</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-between items-center pt-2">
+                  <button onClick={() => setShowImportModal(false)} className="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-bold">Cerrar</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
     }
 
-    function loginAdmin() {
-      var u = document.getElementById('admin-user').value.trim();
-      var p = document.getElementById('admin-pass').value.trim();
-
-      if (u === 'esteban388' && p === 'esteban388') {
-        mostrarVista('view-admin-panel');
-        cargarUsuariosAdmin();
-      } else {
-        mostrarAlerta('admin-login-error', 'Credenciales no válidas');
-      }
-    }
-
-    function cargarUsuariosAdmin() {
-      var tabla = document.getElementById('admin-users-list');
-      tabla.innerHTML = '<tr><td colspan="4">Cargando talleres...</td></tr>';
-
-      fetch(FIREBASE_URL + '.json')
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          tabla.innerHTML = '';
-          if (!data) {
-            tabla.innerHTML = '<tr><td colspan="4">No hay talleres registrados</td></tr>';
-            return;
-          }
-
-          for (var key in data) {
-            var user = data[key];
-            if (!user) continue;
-
-            var nombre = getCampo(user, ['id', 'taller', 'nombre', 'usuario']) || '(Sin nombre)';
-            var clave = getCampo(user, ['password', 'pass', 'clave', 'contraseña', 'pin']) || '(Sin clave)';
-
-            var statusHtml = user.aprobado
-              ? '<span class="status-badge status-approved">Aprobado</span>'
-              : '<span class="status-badge status-pending">Pendiente</span>';
-
-            var accionAprobar = !user.aprobado
-              ? '<button type="button" class="action-btn action-btn-approve" onclick="aprobarUsuario(\'' + key + '\')"><i class="fa-solid fa-check"></i></button>'
-              : '';
-
-            var tr = document.createElement('tr');
-            tr.innerHTML = '<td><strong>' + nombre + '</strong></td>' +
-              '<td><code>' + clave + '</code></td>' +
-              '<td>' + statusHtml + '</td>' +
-              '<td>' +
-                '<div class="action-group">' +
-                  accionAprobar +
-                  '<button type="button" class="action-btn action-btn-pass" onclick="abrirModalPassword(\'' + key + '\', \'' + nombre + '\')"><i class="fa-solid fa-key"></i></button>' +
-                  '<button type="button" class="action-btn action-btn-del" onclick="abrirModalEliminar(\'' + key + '\', \'' + nombre + '\')"><i class="fa-solid fa-trash"></i></button>' +
-                '</div>' +
-              '</td>';
-            tabla.appendChild(tr);
-          }
-        })
-        .catch(function() {
-          tabla.innerHTML = '<tr><td colspan="4">Error de conexión</td></tr>';
-        });
-    }
-
-    function aprobarUsuario(key) {
-      fetch(FIREBASE_URL + '/' + key + '.json', {
-        method: 'PATCH',
-        body: JSON.stringify({ aprobado: true })
-      }).then(function() {
-        cargarUsuariosAdmin();
-        mostrarToast('Taller aprobado');
-      });
-    }
-
-    // CONTROL DEL MODAL DE CONTRASEÑA
-    function abrirModalPassword(key, tallerNombre) {
-      document.getElementById('modal-pass-key').value = key;
-      document.getElementById('modal-taller-nombre').textContent = 'Taller: ' + tallerNombre;
-      document.getElementById('modal-new-pass').value = '';
-      document.getElementById('modal-pass').style.display = 'flex';
-    }
-
-    function guardarPasswordModal() {
-      var key = document.getElementById('modal-pass-key').value;
-      var nueva = document.getElementById('modal-new-pass').value.trim();
-
-      if (!nueva) {
-        alert('Escribe una contraseña válida');
-        return;
-      }
-
-      fetch(FIREBASE_URL + '/' + key + '.json', {
-        method: 'PATCH',
-        body: JSON.stringify({
-          password: nueva,
-          pass: nueva,
-          clave: nueva
-        })
-      }).then(function() {
-        cerrarModales();
-        cargarUsuariosAdmin();
-        mostrarToast('Contraseña cambiada');
-      });
-    }
-
-    // CONTROL DEL MODAL DE ELIMINACIÓN
-    function abrirModalEliminar(key, tallerNombre) {
-      document.getElementById('modal-del-key').value = key;
-      document.getElementById('modal-del-taller').textContent = 'Se borrará el acceso para: ' + tallerNombre;
-      document.getElementById('modal-del').style.display = 'flex';
-    }
-
-    function confirmarEliminarModal() {
-      var key = document.getElementById('modal-del-key').value;
-      fetch(FIREBASE_URL + '/' + key + '.json', {
-        method: 'DELETE'
-      }).then(function() {
-        cerrarModales();
-        cargarUsuariosAdmin();
-        mostrarToast('Taller eliminado');
-      });
-    }
-
-    function cerrarModales() {
-      document.getElementById('modal-pass').style.display = 'none';
-      document.getElementById('modal-del').style.display = 'none';
-    }
-
-    function cerrarSesion() {
-      if (otpInterval) clearInterval(otpInterval);
-      document.getElementById('login-id').value = '';
-      document.getElementById('login-pass').value = '';
-      mostrarVista('view-login');
-    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
 </html>
