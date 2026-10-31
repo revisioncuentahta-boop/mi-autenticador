@@ -323,12 +323,15 @@
     }
 
     .action-btn {
-      padding: 5px 8px;
+      padding: 6px 8px;
       border-radius: 6px;
       border: none;
       cursor: pointer;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .action-btn-approve {
@@ -345,13 +348,51 @@
       background: var(--danger);
       color: #ffffff;
     }
+
+    /* MODAL FLOTANTE NATIVO PARA EDITAR / CONFIRMAR */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-box {
+      background: #0d274d;
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+
+    .modal-box h3 {
+      font-size: 16px;
+      margin-bottom: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
     
-    <!-- VISTA 1: LOGIN -->
+    <!-- VISTA 1: LOGIN TALLERES -->
     <div id="view-login" class="card">
       <div class="header">
         <img src="logo-posventa.png" onerror="this.src='logo-posventa.png.png'" alt="Logo" class="brand-img">
@@ -531,6 +572,39 @@
 
   </div>
 
+  <!-- MODAL PARA CAMBIAR CONTRASEÑA -->
+  <div id="modal-pass" class="modal-overlay">
+    <div class="modal-box">
+      <h3>Modificar Contraseña</h3>
+      <p id="modal-taller-nombre" style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;"></p>
+      <input type="hidden" id="modal-pass-key">
+      
+      <div class="input-box" style="margin-bottom: 14px;">
+        <i class="fa-solid fa-key"></i>
+        <input type="text" id="modal-new-pass" placeholder="Nueva contraseña">
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" style="margin-top: 0;" onclick="guardarPasswordModal()">Guardar</button>
+        <button type="button" class="btn btn-outline" style="margin-top: 0;" onclick="cerrarModales()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PARA CONFIRMAR ELIMINACIÓN -->
+  <div id="modal-del" class="modal-overlay">
+    <div class="modal-box">
+      <h3>¿Eliminar Taller?</h3>
+      <p id="modal-del-taller" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;"></p>
+      <input type="hidden" id="modal-del-key">
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" style="background: var(--danger); margin-top: 0;" onclick="confirmarEliminarModal()">Eliminar</button>
+        <button type="button" class="btn btn-outline" style="margin-top: 0;" onclick="cerrarModales()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast">Texto copiado</div>
 
   <script>
@@ -548,7 +622,7 @@
         secret: OTPAuth.Secret.fromBase32(TOTP_SECRET)
       });
     } catch (e) {
-      console.log('Error al inicializar TOTP', e);
+      console.log(e);
     }
 
     var otpInterval = null;
@@ -721,14 +795,14 @@
               fecha: new Date().toISOString()
             })
           }).then(function() {
-            alert('Solicitud enviada con éxito. Automotor revisará tu autorización.');
+            mostrarToast('Solicitud enviada');
             document.getElementById('reg-id').value = '';
             document.getElementById('reg-pass').value = '';
             mostrarVista('view-login');
           });
         })
         .catch(function() {
-          mostrarAlerta('register-msg', 'Error de conexión al enviar la solicitud');
+          mostrarAlerta('register-msg', 'Error al enviar solicitud');
         });
     }
 
@@ -740,7 +814,7 @@
         mostrarVista('view-admin-panel');
         cargarUsuariosAdmin();
       } else {
-        mostrarAlerta('admin-login-error', 'Credenciales de administrador no válidas');
+        mostrarAlerta('admin-login-error', 'Credenciales no válidas');
       }
     }
 
@@ -769,7 +843,7 @@
               : '<span class="status-badge status-pending">Pendiente</span>';
 
             var accionAprobar = !user.aprobado
-              ? '<button class="action-btn action-btn-approve" onclick="aprobarUsuario(\'' + key + '\')"><i class="fa-solid fa-check"></i></button>'
+              ? '<button type="button" class="action-btn action-btn-approve" onclick="aprobarUsuario(\'' + key + '\')"><i class="fa-solid fa-check"></i></button>'
               : '';
 
             var tr = document.createElement('tr');
@@ -779,15 +853,15 @@
               '<td>' +
                 '<div class="action-group">' +
                   accionAprobar +
-                  '<button class="action-btn action-btn-pass" onclick="cambiarPassword(\'' + key + '\', \'' + nombre + '\')"><i class="fa-solid fa-key"></i></button>' +
-                  '<button class="action-btn action-btn-del" onclick="eliminarUsuario(\'' + key + '\')"><i class="fa-solid fa-trash"></i></button>' +
+                  '<button type="button" class="action-btn action-btn-pass" onclick="abrirModalPassword(\'' + key + '\', \'' + nombre + '\')"><i class="fa-solid fa-key"></i></button>' +
+                  '<button type="button" class="action-btn action-btn-del" onclick="abrirModalEliminar(\'' + key + '\', \'' + nombre + '\')"><i class="fa-solid fa-trash"></i></button>' +
                 '</div>' +
               '</td>';
             tabla.appendChild(tr);
           }
         })
         .catch(function() {
-          tabla.innerHTML = '<tr><td colspan="4">Error al cargar registros</td></tr>';
+          tabla.innerHTML = '<tr><td colspan="4">Error de conexión</td></tr>';
         });
     }
 
@@ -801,28 +875,58 @@
       });
     }
 
-    function cambiarPassword(key, tallerNombre) {
-      var nueva = prompt('Ingresa la nueva contraseña para el taller ' + tallerNombre + ':');
-      if (nueva && nueva.trim() !== '') {
-        fetch(FIREBASE_URL + '/' + key + '.json', {
-          method: 'PATCH',
-          body: JSON.stringify({ password: nueva.trim() })
-        }).then(function() {
-          cargarUsuariosAdmin();
-          mostrarToast('Contraseña actualizada');
-        });
-      }
+    // CONTROL DEL MODAL DE CONTRASEÑA
+    function abrirModalPassword(key, tallerNombre) {
+      document.getElementById('modal-pass-key').value = key;
+      document.getElementById('modal-taller-nombre').textContent = 'Taller: ' + tallerNombre;
+      document.getElementById('modal-new-pass').value = '';
+      document.getElementById('modal-pass').style.display = 'flex';
     }
 
-    function eliminarUsuario(key) {
-      if (confirm('¿Eliminar este taller?')) {
-        fetch(FIREBASE_URL + '/' + key + '.json', {
-          method: 'DELETE'
-        }).then(function() {
-          cargarUsuariosAdmin();
-          mostrarToast('Taller eliminado');
-        });
+    function guardarPasswordModal() {
+      var key = document.getElementById('modal-pass-key').value;
+      var nueva = document.getElementById('modal-new-pass').value.trim();
+
+      if (!nueva) {
+        alert('Escribe una contraseña válida');
+        return;
       }
+
+      fetch(FIREBASE_URL + '/' + key + '.json', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          password: nueva,
+          pass: nueva,
+          clave: nueva
+        })
+      }).then(function() {
+        cerrarModales();
+        cargarUsuariosAdmin();
+        mostrarToast('Contraseña cambiada');
+      });
+    }
+
+    // CONTROL DEL MODAL DE ELIMINACIÓN
+    function abrirModalEliminar(key, tallerNombre) {
+      document.getElementById('modal-del-key').value = key;
+      document.getElementById('modal-del-taller').textContent = 'Se borrará el acceso para: ' + tallerNombre;
+      document.getElementById('modal-del').style.display = 'flex';
+    }
+
+    function confirmarEliminarModal() {
+      var key = document.getElementById('modal-del-key').value;
+      fetch(FIREBASE_URL + '/' + key + '.json', {
+        method: 'DELETE'
+      }).then(function() {
+        cerrarModales();
+        cargarUsuariosAdmin();
+        mostrarToast('Taller eliminado');
+      });
+    }
+
+    function cerrarModales() {
+      document.getElementById('modal-pass').style.display = 'none';
+      document.getElementById('modal-del').style.display = 'none';
     }
 
     function cerrarSesion() {
